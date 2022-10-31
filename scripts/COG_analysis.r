@@ -1,5 +1,6 @@
 #center of gravity analysis 
 library(dismo)
+library(here)
 library(tidyverse)
 library(SDMTools)
 library(glue)
@@ -18,43 +19,63 @@ world <- ne_countries(scale = "medium", returnclass = "sf")
 ### step 1. determining presence/absence threshold for each model ####
 
 #load data and the model
-NWA_PLL<-readRDS("C:/Users/nfarc/Desktop/NASA_FaCeT/Data/2_AIS_wENV/processed/Pres_Abs_2013to2020_NWA_USA_LL_onlyfishing_v2_1to1ratio_absenceconstrained_convexhull.rds")
+NWA_PLL<-here("data","AIS_processed","NWA_PLL","Pres_Abs_2013to2020_NWA_USA_LL_onlyfishing_v2_1to1ratio_absenceconstrained_convexhull.rds") %>% readRDS()
 
-brt<-readRDS("E:/VDM_results/NWA_gbm_convexhull/brt_v2.rds")
-
-#empty=list()
+brt<-here("data","VDM_and_eval","NWA_PLL","brt_v2.rds") %>% readRDS()
 
 #need to evaluate the model first
 NWA_PLL$lunar <- lunar::lunar.illumination(NWA_PLL$date)
+
 evall<-dismo::evaluate(p=NWA_PLL %>% filter(Pres_abs==1),a=NWA_PLL %>% filter(Pres_abs==0),model=brt,type='response')
   
-NWA_PLL_thres<-threshold(evall) #this is for finding the best threshold to reclassify your predictions into presence/absence
+#NWA_PLL_thres<-threshold(evall) #this is for finding the best threshold to reclassify your predictions into presence/absence
 #threshold is from the dismo package if you want to learn more
 
-#empty[[length(empty)+1]]=a ----this is if I need to evaluate a bunch of models as it add the threshold values from above to a empty list
+#find the 75% threshold 
+
+threshold_finder<-function(VDM_path){
+  VDMdaily_ras<-list.files(VDM_path, full.names = TRUE) %>%
+    grep(pattern = ".nc", value = TRUE) 
+  
+  thresh_df<-list()
+  
+  for(i in 1:length(VDMdaily_ras)){
+    print(VDMdaily_ras[i])
+    
+    ras<-raster(VDMdaily_ras[i])
+    quant75<-quantile(ras$layer)[4]
+    
+    daily_thresh<-data.frame(quantile75=quant75,
+                      date=as.Date(substr(VDMdaily_ras[i], 58,67)),format = "%Y-%m-%d")
+    
+    thresh_df[[length(thresh_df)+1]]<-daily_thresh
+  }
+  thresh_df<-bind_rows(thresh_df)
+  return(thresh_df)
+
+}
+
+#VDM prediction raster path
+VDMdaily<-"E:/VDM_results/NWA_gbm_convexhull/Spatial_Predictions_v2"
+
+#run the threshold finder function on NWA_PLL predictions
+NWA_PLL_VDMthres<-threshold_finder(VDMdaily)
+
+#mean 75% quantile raster
+thresh<-NWA_PLL_VDMthres %>% summarise(threshold = mean(quantile75, na.rm=T))
 
 
-### step 2. reclassify predictions into presence absence, calculate habitat metrics on reclassified predictions ####
-
-VDMharddrivepath<-"E:/VDM_results/NWA_gbm_convexhull"
-
-predir=glue("{VDMharddrivepath}/Spatial_Predictions_v2/")
-
-#statdir=glue("{VDMharddrivepath}/Spatial_Predictions/Binary_reclassifed") ## whre you want to write out results of the habitat metric analysis
-
-#thresh<-NWA_PLL_thres$equal_sens_spec #this is the value that Heather used in a previous study
-thresh <- 0.75 #trying what elliott did as >0.75 is essential habitat 
-
-VDM_predictions<-list.files(predir) %>%
-  grep(pattern = ".nc", value = TRUE)
+#now use the mean 75% quantile threshold to reclassify 
+VDMdaily_ras<-list.files(VDMdaily, full.names = TRUE) %>%
+  grep(pattern = ".nc", value = TRUE) 
 
 cog_df<-list()
 
-for (i in 1:length(VDM_predictions)){
-  setwd(predir)
-  ras_date <- VDM_predictions[i] %>% raster() 
+for (i in 1:length(VDMdaily_ras)){
+  print(VDMdaily_ras[i])
+  ras_date <- VDMdaily_ras[i] %>% raster() 
   
-  udate<-substr(VDM_predictions[i], 1, 10)
+  udate<-substr(VDMdaily_ras[i], 58,67)
   names(ras_date)<-udate
   ras_date[values(ras_date)>=thresh]=1 # reclassify into 1s and 0s based on the threshold
   ras_date[values(ras_date)<thresh]=0
@@ -85,7 +106,7 @@ for (i in 1:length(VDM_predictions)){
 cog_df<-bind_rows(cog_df)
 
 #save this
-write.csv(cog_df, "E:/VDM_results/NWA_gbm_convexhull/COG_classstats_corehabitat_quantiles.csv")
+write.csv(cog_df, "E:/VDM_results/NWA_gbm_convexhull/COG_classstats_corehabitat_v2_quantiles.csv")
 
 
 
@@ -93,13 +114,13 @@ write.csv(cog_df, "E:/VDM_results/NWA_gbm_convexhull/COG_classstats_corehabitat_
 cog_df$month<-lubridate::month(cog_df$date)
 cog_df$year<-lubridate::year(cog_df$date)
 
-cog_df_yearavg<-cog_df %>% group_by(year,month) %>% summarise(lon=mean(COGx),lat=mean(COGy))
+cog_df_yearavg<-cog_df %>% group_by(year) %>% summarise(lon=mean(COGx),lat=mean(COGy))
 
 plot1<-ggplot() +
   geom_sf(data = world, color= "black", fill = "grey" ) + #bring in world data
   #geom_sf(data = eezs, color = "blue") + #bring in EEZ data
-  #geom_point(data = cog_df_yearavg, aes(x=lon, y=lat, color = as.factor(year)))+
-  geom_point(data= cog_df, aes(x=COGx, y=COGy, color= as.factor(year)))+
+  geom_point(data = cog_df_yearavg, aes(x=lon, y=lat, color = as.factor(year)))+
+  #geom_point(data= cog_df, aes(x=COGx, y=COGy, color= as.factor(year)))+
   coord_sf(xlim = c(-100,-30), ylim = c(10,50), expand = FALSE) + #changing the extent
   ylab("Latitude") + xlab("Longitude") + labs(color = "Year") +
   theme_bw()
@@ -318,7 +339,7 @@ setwd("E:/VDM_results/NWA_gbm_convexhull/Plots_v2")
 ggsave("monthly_anomalies_2012to2020.jpg", width = 7, height = 7)
 
 ###----climatology----###
-cog_df<-read.csv("E:/VDM_results/NWA_gbm_convexhull/COG_classstats_corehabitat.csv")
+cog_df<-read.csv("E:/VDM_results/NWA_gbm_convexhull/COG_classstats_corehabitat_v2_quantiles.csv")
 
 #first looking at latitude
 a=cog_df %>% dplyr::select(date,COGy)

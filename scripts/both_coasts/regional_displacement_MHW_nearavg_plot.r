@@ -14,25 +14,25 @@ library(viridis)
 world <- ne_countries(scale = "medium", returnclass = "sf")
 sf_use_s2(FALSE)# need to do this to remove spherical geometry
 
-########################################
-#average SST throughout the study period
-########################################
-
-## build a time vector to specify the time points of the grids
-time_vec <- seq.POSIXt(as.POSIXct('2012-01-01', tz='UTC'), as.POSIXct('2020-12-01', tz='UTC'), by='month')
-
-## we also need SSTa
-fList <- list.files("E:/OISST/monthly", full.names = TRUE, pattern = ".nc")
-
-fList_years <- c()
-for (i in 1:length(fList)) fList_years[i] <- substr(fList[i], 24,27)
-
-ssta_stack <- raster::stack(fList[which(fList_years %in% lubridate::year(time_vec))])
-
-NWA_SST<-calc(ssta_stack, mean, na.rm=TRUE)
-
-NWA_SST_df<-rasterToPoints(NWA_SST) %>% as.data.frame() %>% 
-  rename("SST"="layer")
+# ########################################
+# #average SST throughout the study period
+# ########################################
+# 
+# ## build a time vector to specify the time points of the grids
+# time_vec <- seq.POSIXt(as.POSIXct('2012-01-01', tz='UTC'), as.POSIXct('2020-12-01', tz='UTC'), by='month')
+# 
+# ## we also need SSTa
+# fList <- list.files("E:/OISST/monthly", full.names = TRUE, pattern = ".nc")
+# 
+# fList_years <- c()
+# for (i in 1:length(fList)) fList_years[i] <- substr(fList[i], 24,27)
+# 
+# ssta_stack <- raster::stack(fList[which(fList_years %in% lubridate::year(time_vec))])
+# 
+# NWA_SST<-calc(ssta_stack, mean, na.rm=TRUE)
+# 
+# NWA_SST_df<-rasterToPoints(NWA_SST) %>% as.data.frame() %>% 
+#   rename("SST"="layer")
 
 #############################################
 #load in mgmt zone shapefiles
@@ -46,106 +46,106 @@ land<-st_read("C:/Users/nfarc/Desktop/RCodes_Shapefiles/Shapefiles/gshhg-shp-2.3
 
 NWA_PLL_zones<-st_difference(NWA_PLL_zones, st_union(st_combine(land)))
 
-###########################################
-#load and combine PLL landscape metrics dfs
-###########################################
-
-NWAPLL_MHW_total<-here("data","Mgmt_zone","NWA_PLL","NWAPLL_MHW_total.rds") %>% 
-  readRDS()
-
-near_avg<-NWAPLL_MHW_total %>% filter(MHW == 0) %>% 
-  filter(mgmt_zone %in% c('NED','MAB','FEC','GOM')) %>% 
-  group_by(mgmt_zone) %>% 
-  summarise(COGx = mean(COGx, na.rm = TRUE),
-            COGy = mean(COGy, na.rm = TRUE))
-
-may_2012_mhw<-NWAPLL_MHW_total %>% 
-  filter(date == as.yearmon("2012-05-01")) %>%
-  filter(mgmt_zone %in% c('NED','MAB','FEC','GOM')) %>% 
-  dplyr::select("mgmt_zone","COGx","COGy")
-
-NED_MAB<-ggplot()+
-  geom_tile(NWA_SST_df, mapping = aes(x=x,y=y,fill=SST))+
-  scale_fill_cmocean(name="thermal",
-                     limits = c(0,30),
-                     guide = guide_colorbar(title.position = "right"))+
-  labs(x="",y="",fill="SST (°C)", title = "NED & MAB")+
-  ggnewscale::new_scale_fill()+
-  geom_sf(data = world, color= "black", fill = "grey")+
-  geom_sf(data = NWA_PLL_zones %>% filter(ET_ID %in% c('NED','MAB','FEC','GOM')), color = "cyan", fill=NA, size = 1)+ 
-  geom_point(NWAPLL_MHW_total %>% filter(MHW == 1) %>% filter(mgmt_zone %in% c('NED','MAB','FEC','GOM')), 
-             mapping = aes(x = COGx, y = COGy,color = mgmt_zone),
-             shape = 21, size = 2, show.legend = FALSE) +
-  geom_point(near_avg, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone), 
-             color = "black",
-             shape = 23, size = 3,show.legend = FALSE)+
-  geom_point(may_2012_mhw, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone), 
-             color = "black", 
-             shape = 21, size = 3, show.legend = FALSE)+
-  shadowtext::geom_shadowtext(may_2012_mhw, mapping = aes(x=COGx + 5.5,y=COGy, 
-                                                          color = mgmt_zone,
-                                                          label = "May 2012",
-                                                          fontface = "bold"),
-                              show.legend = FALSE)+
-  coord_sf(xlim =  c(-97.5, -40), ylim = c(35, 49.5), expand = TRUE)+
-  theme_bw()+
-  theme(legend.spacing.y = unit(0.2, 'cm'),
-        legend.spacing.x = unit(0.15, 'cm'),
-        legend.margin=margin(0,0,0,0),
-        legend.box.margin=margin(5,5,-7,-7),
-        legend.title = element_text(angle = 90),
-        legend.title.align = 0.5) 
-
-
-FEC_GOM<-ggplot()+
-  geom_tile(NWA_SST_df, mapping = aes(x=x,y=y,fill=SST))+
-  scale_fill_cmocean(name="thermal",
-                     limits = c(0,30),
-                     guide = guide_colorbar(title.position = "right"))+
-  labs(x="",y="",fill="SST (°C)", title = "FEC & GOM")+
-  ggnewscale::new_scale_fill()+
-  geom_sf(data = world, color= "black", fill = "grey")+
-  geom_sf(data = NWA_PLL_zones %>% filter(ET_ID %in% c('NED','MAB','FEC','GOM')), color = "cyan", fill=NA, size = 1)+
-  geom_point(NWAPLL_MHW_total %>% filter(MHW == 1) %>% filter(mgmt_zone %in% c('NED','MAB','FEC','GOM')), 
-             mapping = aes(x = COGx, y = COGy, color = mgmt_zone),
-             pch = 21, size = 3, show.legend = FALSE) +
-  geom_point(near_avg, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone),
-             color = "black",
-             shape = 23, size = 3,show.legend = FALSE)+
-  geom_point(may_2012_mhw, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone), 
-             color = "black", 
-             shape = 21, size = 3, show.legend = FALSE)+
-  shadowtext::geom_shadowtext(may_2012_mhw, mapping = aes(x=COGx + 6,y=COGy, 
-                                                          color = mgmt_zone,
-                                                          label = "May 2012",
-                                                          fontface = "bold"),
-                              show.legend = FALSE)+
-  coord_sf(xlim =  c(-97.5, -40), ylim = c(11.5, 33.5), expand = TRUE)+
-  theme_bw()+
-  theme(legend.spacing.y = unit(0.2, 'cm'),
-        legend.spacing.x = unit(0.15, 'cm'),
-        legend.margin=margin(0,0,0,0),
-        legend.box.margin=margin(5,5,-7,-7),
-        legend.title = element_text(angle = 90),
-        legend.title.align = 0.5)
-
-NED_MAB / FEC_GOM
+# ###########################################
+# #load and combine PLL landscape metrics dfs
+# ###########################################
+# 
+# NWAPLL_MHW_total<-here("data","Mgmt_zone","NWA_PLL","NWAPLL_MHW_total.rds") %>% 
+#   readRDS()
+# 
+# near_avg<-NWAPLL_MHW_total %>% filter(MHW == 0) %>% 
+#   filter(mgmt_zone %in% c('NED','MAB','FEC','GOM')) %>% 
+#   group_by(mgmt_zone) %>% 
+#   summarise(COGx = mean(COGx, na.rm = TRUE),
+#             COGy = mean(COGy, na.rm = TRUE))
+# 
+# may_2012_mhw<-NWAPLL_MHW_total %>% 
+#   filter(date == as.yearmon("2012-05-01")) %>%
+#   filter(mgmt_zone %in% c('NED','MAB','FEC','GOM')) %>% 
+#   dplyr::select("mgmt_zone","COGx","COGy")
+# 
+# NED_MAB<-ggplot()+
+#   geom_tile(NWA_SST_df, mapping = aes(x=x,y=y,fill=SST))+
+#   scale_fill_cmocean(name="thermal",
+#                      limits = c(0,30),
+#                      guide = guide_colorbar(title.position = "right"))+
+#   labs(x="",y="",fill="SST (°C)", title = "NED & MAB")+
+#   ggnewscale::new_scale_fill()+
+#   geom_sf(data = world, color= "black", fill = "grey")+
+#   geom_sf(data = NWA_PLL_zones %>% filter(ET_ID %in% c('NED','MAB','FEC','GOM')), color = "cyan", fill=NA, size = 1)+ 
+#   geom_point(NWAPLL_MHW_total %>% filter(MHW == 1) %>% filter(mgmt_zone %in% c('NED','MAB','FEC','GOM')), 
+#              mapping = aes(x = COGx, y = COGy,color = mgmt_zone),
+#              shape = 21, size = 2, show.legend = FALSE) +
+#   geom_point(near_avg, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone), 
+#              color = "black",
+#              shape = 23, size = 3,show.legend = FALSE)+
+#   geom_point(may_2012_mhw, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone), 
+#              color = "black", 
+#              shape = 21, size = 3, show.legend = FALSE)+
+#   shadowtext::geom_shadowtext(may_2012_mhw, mapping = aes(x=COGx + 5.5,y=COGy, 
+#                                                           color = mgmt_zone,
+#                                                           label = "May 2012",
+#                                                           fontface = "bold"),
+#                               show.legend = FALSE)+
+#   coord_sf(xlim =  c(-97.5, -40), ylim = c(35, 49.5), expand = TRUE)+
+#   theme_bw()+
+#   theme(legend.spacing.y = unit(0.2, 'cm'),
+#         legend.spacing.x = unit(0.15, 'cm'),
+#         legend.margin=margin(0,0,0,0),
+#         legend.box.margin=margin(5,5,-7,-7),
+#         legend.title = element_text(angle = 90),
+#         legend.title.align = 0.5) 
+# 
+# 
+# FEC_GOM<-ggplot()+
+#   geom_tile(NWA_SST_df, mapping = aes(x=x,y=y,fill=SST))+
+#   scale_fill_cmocean(name="thermal",
+#                      limits = c(0,30),
+#                      guide = guide_colorbar(title.position = "right"))+
+#   labs(x="",y="",fill="SST (°C)", title = "FEC & GOM")+
+#   ggnewscale::new_scale_fill()+
+#   geom_sf(data = world, color= "black", fill = "grey")+
+#   geom_sf(data = NWA_PLL_zones %>% filter(ET_ID %in% c('NED','MAB','FEC','GOM')), color = "cyan", fill=NA, size = 1)+
+#   geom_point(NWAPLL_MHW_total %>% filter(MHW == 1) %>% filter(mgmt_zone %in% c('NED','MAB','FEC','GOM')), 
+#              mapping = aes(x = COGx, y = COGy, color = mgmt_zone),
+#              pch = 21, size = 3, show.legend = FALSE) +
+#   geom_point(near_avg, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone),
+#              color = "black",
+#              shape = 23, size = 3,show.legend = FALSE)+
+#   geom_point(may_2012_mhw, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone), 
+#              color = "black", 
+#              shape = 21, size = 3, show.legend = FALSE)+
+#   shadowtext::geom_shadowtext(may_2012_mhw, mapping = aes(x=COGx + 6,y=COGy, 
+#                                                           color = mgmt_zone,
+#                                                           label = "May 2012",
+#                                                           fontface = "bold"),
+#                               show.legend = FALSE)+
+#   coord_sf(xlim =  c(-97.5, -40), ylim = c(11.5, 33.5), expand = TRUE)+
+#   theme_bw()+
+#   theme(legend.spacing.y = unit(0.2, 'cm'),
+#         legend.spacing.x = unit(0.15, 'cm'),
+#         legend.margin=margin(0,0,0,0),
+#         legend.box.margin=margin(5,5,-7,-7),
+#         legend.title = element_text(angle = 90),
+#         legend.title.align = 0.5)
+# 
+# NED_MAB / FEC_GOM
 
 ###############################################################################
 #NEP TROLL
 ###############################################################################
 
-########################################
-#average SST throughout the study period
-########################################
-Conception_Monterey_Eureka_Columbia_Vancouver_MHW<-here("data","water_temp",
-                                                        "NEP","oisst","Conception_Monterey_Eureka_Columbia_Vancouver_MHW.rds") %>% readRDS()
-
-NEP_SST<-Conception_Monterey_Eureka_Columbia_Vancouver_MHW %>%
-  filter(yearmon >= as.yearmon("2012-01-01")) %>% 
-  dplyr::select(lat,lon,temp_monthly) %>% 
-  group_by(lat,lon) %>% 
-  summarise(SST = mean(temp_monthly, na.rm=TRUE),.groups = 'drop')
+# ########################################
+# #average SST throughout the study period
+# ########################################
+# Conception_Monterey_Eureka_Columbia_Vancouver_MHW<-here("data","water_temp",
+#                                                         "NEP","oisst","Conception_Monterey_Eureka_Columbia_Vancouver_MHW.rds") %>% readRDS()
+# 
+# NEP_SST<-Conception_Monterey_Eureka_Columbia_Vancouver_MHW %>%
+#   filter(yearmon >= as.yearmon("2012-01-01")) %>% 
+#   dplyr::select(lat,lon,temp_monthly) %>% 
+#   group_by(lat,lon) %>% 
+#   summarise(SST = mean(temp_monthly, na.rm=TRUE),.groups = 'drop')
 
 #############################################
 #load in mgmt zone shapefiles
@@ -160,93 +160,93 @@ land<-st_read("C:/Users/nfarc/Desktop/RCodes_Shapefiles/Shapefiles/gshhg-shp-2.3
 
 NEP_TROLL_zones<-st_difference(NEP_TROLL_zones, st_union(st_combine(land)))
 
-###########################################
-#load and combine TROLL landscape metrics dfs
-###########################################
-
-NEPTROLL_MHW_total<-here("data","Mgmt_zone","NEP_TROLL",
-                         "NEPTROLL_MHW_total.rds") %>% 
-  readRDS()
-
-near_avg<-NEPTROLL_MHW_total %>% filter(MHW == 0) %>% 
-  filter(mgmt_zone %in% c('VN','CL','MT','CP')) %>% 
-  group_by(mgmt_zone) %>% 
-  summarise(COGx = mean(COGx, na.rm = TRUE),
-            COGy = mean(COGy, na.rm = TRUE))
-
-may_2015_mhw<-NEPTROLL_MHW_total %>% 
-  filter(date == as.yearmon("2015-05-01")) %>%
-  filter(mgmt_zone %in% c('VN','CL','MT','CP')) %>% 
-  dplyr::select("mgmt_zone","COGx","COGy")
-
-VN_CL<-ggplot()+
-  geom_tile(NEP_SST, mapping = aes(x=lon,y=lat,fill=SST))+
-  scale_fill_cmocean(name="thermal",
-                     limits = c(0,30),
-                     guide = guide_colorbar(title.position = "right"))+
-  labs(x="",y="",fill="SST (°C)", title = "VN & CL")+
-  ggnewscale::new_scale_fill()+
-  geom_sf(data = world, color= "black", fill = "grey")+
-  geom_sf(data = NEP_TROLL_zones %>% filter(ET_ID %in% c('VN','CL','MT','CP')), color = "cyan", fill=NA, size = 1)+
-  geom_point(NEPTROLL_MHW_total %>% filter(MHW == 1) %>% filter(mgmt_zone %in% c('VN','CL','MT','CP')), 
-             mapping = aes(x = COGx, y = COGy,color = mgmt_zone),
-             shape = 21, size = 2, show.legend = FALSE) +
-  geom_point(near_avg, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone), 
-             color = "black",
-             shape = 23, size = 3,show.legend = FALSE)+
-  geom_point(may_2015_mhw, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone), 
-             color = "black", 
-             shape = 21, size = 3, show.legend = FALSE)+
-  shadowtext::geom_shadowtext(may_2015_mhw, mapping = aes(x=COGx - 3,y=COGy, 
-                                                          color = mgmt_zone,
-                                                          label = "May 2015",
-                                                          fontface = "bold"),
-                              show.legend = FALSE)+
-  coord_sf(xlim =  c(-134.5, -117), ylim = c(43, 54), expand = TRUE)+
-  theme_bw()+
-  theme(legend.spacing.y = unit(0.2, 'cm'),
-        legend.spacing.x = unit(0.15, 'cm'),
-        legend.margin=margin(0,0,0,0),
-        legend.box.margin=margin(5,5,-7,-7),
-        legend.title = element_text(angle = 90),
-        legend.title.align = 0.5)
-
-MT_CP<-ggplot()+
-  geom_tile(NEP_SST, mapping = aes(x=lon,y=lat,fill=SST))+
-  scale_fill_cmocean(name="thermal",
-                     limits = c(0,30),
-                     guide = guide_colorbar(title.position = "right"))+
-  
-  labs(x="",y="",fill="SST (°C)", title = "MT & CP")+
-  ggnewscale::new_scale_fill()+
-  geom_sf(data = world, color= "black", fill = "grey")+
-  geom_sf(data = NEP_TROLL_zones %>% filter(ET_ID %in% c('VN','CL','MT','CP')), color = "cyan", fill=NA, size = 1)+ 
-  geom_point(NEPTROLL_MHW_total %>% filter(MHW == 1) %>% filter(mgmt_zone %in% c('VN','CL','MT','CP')), 
-             mapping = aes(x = COGx, y = COGy,color = mgmt_zone),
-             shape = 21, size = 2, show.legend = FALSE) +
-  geom_point(near_avg, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone), 
-             color = "black",
-             shape = 23, size = 3,show.legend = FALSE)+
-  geom_point(may_2015_mhw, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone), 
-             color = "black", 
-             shape = 21, size = 3, show.legend = FALSE)+
-  shadowtext::geom_shadowtext(may_2015_mhw, mapping = aes(x=COGx - 3,y=COGy,
-                                                          color = mgmt_zone,
-                                                          label = "May 2015",
-                                                          fontface = "bold"),
-                              show.legend = FALSE)+
-  coord_sf(xlim =  c(-134.5, -117), ylim = c(32, 40), expand = TRUE)+
-  theme_bw()+
-  theme(legend.spacing.y = unit(0.2, 'cm'),
-        legend.spacing.x = unit(0.15, 'cm'),
-        legend.margin=margin(0,0,0,0),
-        legend.box.margin=margin(5,5,-7,-7),
-        legend.title = element_text(angle = 90),
-        legend.title.align = 0.5)
-
-#(VN_CL | NED_MAB) / (MT_CP | FEC_GOM)
-
-(VN_CL / MT_CP) | (NED_MAB / FEC_GOM)
+# ###########################################
+# #load and combine TROLL landscape metrics dfs
+# ###########################################
+# 
+# NEPTROLL_MHW_total<-here("data","Mgmt_zone","NEP_TROLL",
+#                          "NEPTROLL_MHW_total.rds") %>% 
+#   readRDS()
+# 
+# near_avg<-NEPTROLL_MHW_total %>% filter(MHW == 0) %>% 
+#   filter(mgmt_zone %in% c('VN','CL','MT','CP')) %>% 
+#   group_by(mgmt_zone) %>% 
+#   summarise(COGx = mean(COGx, na.rm = TRUE),
+#             COGy = mean(COGy, na.rm = TRUE))
+# 
+# may_2015_mhw<-NEPTROLL_MHW_total %>% 
+#   filter(date == as.yearmon("2015-05-01")) %>%
+#   filter(mgmt_zone %in% c('VN','CL','MT','CP')) %>% 
+#   dplyr::select("mgmt_zone","COGx","COGy")
+# 
+# VN_CL<-ggplot()+
+#   geom_tile(NEP_SST, mapping = aes(x=lon,y=lat,fill=SST))+
+#   scale_fill_cmocean(name="thermal",
+#                      limits = c(0,30),
+#                      guide = guide_colorbar(title.position = "right"))+
+#   labs(x="",y="",fill="SST (°C)", title = "VN & CL")+
+#   ggnewscale::new_scale_fill()+
+#   geom_sf(data = world, color= "black", fill = "grey")+
+#   geom_sf(data = NEP_TROLL_zones %>% filter(ET_ID %in% c('VN','CL','MT','CP')), color = "cyan", fill=NA, size = 1)+
+#   geom_point(NEPTROLL_MHW_total %>% filter(MHW == 1) %>% filter(mgmt_zone %in% c('VN','CL','MT','CP')), 
+#              mapping = aes(x = COGx, y = COGy,color = mgmt_zone),
+#              shape = 21, size = 2, show.legend = FALSE) +
+#   geom_point(near_avg, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone), 
+#              color = "black",
+#              shape = 23, size = 3,show.legend = FALSE)+
+#   geom_point(may_2015_mhw, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone), 
+#              color = "black", 
+#              shape = 21, size = 3, show.legend = FALSE)+
+#   shadowtext::geom_shadowtext(may_2015_mhw, mapping = aes(x=COGx - 3,y=COGy, 
+#                                                           color = mgmt_zone,
+#                                                           label = "May 2015",
+#                                                           fontface = "bold"),
+#                               show.legend = FALSE)+
+#   coord_sf(xlim =  c(-134.5, -117), ylim = c(43, 54), expand = TRUE)+
+#   theme_bw()+
+#   theme(legend.spacing.y = unit(0.2, 'cm'),
+#         legend.spacing.x = unit(0.15, 'cm'),
+#         legend.margin=margin(0,0,0,0),
+#         legend.box.margin=margin(5,5,-7,-7),
+#         legend.title = element_text(angle = 90),
+#         legend.title.align = 0.5)
+# 
+# MT_CP<-ggplot()+
+#   geom_tile(NEP_SST, mapping = aes(x=lon,y=lat,fill=SST))+
+#   scale_fill_cmocean(name="thermal",
+#                      limits = c(0,30),
+#                      guide = guide_colorbar(title.position = "right"))+
+#   
+#   labs(x="",y="",fill="SST (°C)", title = "MT & CP")+
+#   ggnewscale::new_scale_fill()+
+#   geom_sf(data = world, color= "black", fill = "grey")+
+#   geom_sf(data = NEP_TROLL_zones %>% filter(ET_ID %in% c('VN','CL','MT','CP')), color = "cyan", fill=NA, size = 1)+ 
+#   geom_point(NEPTROLL_MHW_total %>% filter(MHW == 1) %>% filter(mgmt_zone %in% c('VN','CL','MT','CP')), 
+#              mapping = aes(x = COGx, y = COGy,color = mgmt_zone),
+#              shape = 21, size = 2, show.legend = FALSE) +
+#   geom_point(near_avg, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone), 
+#              color = "black",
+#              shape = 23, size = 3,show.legend = FALSE)+
+#   geom_point(may_2015_mhw, mapping = aes(x=COGx,y=COGy, fill = mgmt_zone), 
+#              color = "black", 
+#              shape = 21, size = 3, show.legend = FALSE)+
+#   shadowtext::geom_shadowtext(may_2015_mhw, mapping = aes(x=COGx - 3,y=COGy,
+#                                                           color = mgmt_zone,
+#                                                           label = "May 2015",
+#                                                           fontface = "bold"),
+#                               show.legend = FALSE)+
+#   coord_sf(xlim =  c(-134.5, -117), ylim = c(32, 40), expand = TRUE)+
+#   theme_bw()+
+#   theme(legend.spacing.y = unit(0.2, 'cm'),
+#         legend.spacing.x = unit(0.15, 'cm'),
+#         legend.margin=margin(0,0,0,0),
+#         legend.box.margin=margin(5,5,-7,-7),
+#         legend.title = element_text(angle = 90),
+#         legend.title.align = 0.5)
+# 
+# #(VN_CL | NED_MAB) / (MT_CP | FEC_GOM)
+# 
+# (VN_CL / MT_CP) | (NED_MAB / FEC_GOM)
 
 
 
@@ -296,9 +296,9 @@ MHWCOG_NWA<-left_join(MHWCOG_NWA, area_df, by=c("mgmt_zone")) %>%
 
 
 MHWCOG_NWA$mgmt_zone<-factor(MHWCOG_NWA$mgmt_zone,
-                         levels = rev(c("CAR","GOM","FEC",
+                         levels = c("CAR","GOM","FEC",
                                         "SAR","SAB",
-                                        "MAB","NEC","NED")))
+                                        "MAB","NEC","NED"))
 
 # MHWCOG_NWA<-MHWCOG_NWA %>%
 #   mutate(bin = cut_interval(MHWCOG_NWA$dis_per_area, n=15)) %>%
@@ -372,42 +372,91 @@ MHWCOG_NWA<-MHWCOG_NWA %>%
          percent_change_reldis=((dis_per_area - month_mean_reldis)/month_mean_reldis)*100) %>% ungroup()
 
 mgmtzones<-unique(as.character(MHWCOG_NWA$mgmt_zone))
-ks<-data.frame(pval=NA)
+ks<-data.frame(mgmt_zone=NA, pvalue=NA, D=NA)
 counter = 1
 for(i in 1:length(mgmtzones)){
   a<-MHWCOG_NWA %>% filter(mgmt_zone == mgmtzones[i])
   b<-a %>% filter(MHW == 1)
   c<-a %>% filter(MHW == 0)
   print(mgmtzones[i])
-  ks[counter,1]<-paste0(mgmtzones[i]," : ",round(ks.test(log(b$dis_per_area),log(c$dis_per_area))$p.value,4))
+  ks_test<-ks.test(log(c$dis_per_area),log(b$dis_per_area),
+                   alternative = 'greater')
+  pvalue<-round(ks_test$p.value,4)
+  d<-round(ks_test$statistic,4)
+  ks[counter,1]<-mgmtzones[i]
+  ks[counter,2]<-pvalue
+  ks[counter,3]<-d
+    
+    
+  #ks[counter,1]<-paste0(mgmtzones[i]," : ","P-value = ",pvalue)
   counter = counter + 1
 }
 
-kspv_NWA <- ks$pval
-names(kspv_NWA) <- unique(as.character(MHWCOG_NWA$mgmt_zone))
+ks_pvD_NWA <- ks
 
-labels_NWA<-data.frame(mgmt_zone = factor(c("NED","MAB","FEC","CAR")),
-                       label = c("(E)","(F)","(G)","(H)"))
-#density plots
-NWA_plot<-MHWCOG_NWA %>% filter(mgmt_zone %in% c("NED", "MAB", "FEC", "CAR")) %>% 
-  group_by(mgmt_zone,month) %>% 
-  mutate(month_mean_reldis = mean(dis_per_area, na.rm=TRUE),
-         percent_change_reldis=((dis_per_area - month_mean_reldis)/month_mean_reldis)*100) %>% ungroup %>%  
+
+# names(ks_pvD_NWA) <- unique(as.character(MHWCOG_NWA$mgmt_zone))
+# 
+# labels_NWA<-data.frame(mgmt_zone = factor(c("NED","MAB","FEC","CAR")),
+#                        label = c("(E)","(F)","(G)","(H)"))
+# #density plots
+# NWA_plot<-MHWCOG_NWA %>% filter(mgmt_zone %in% c("NED", "MAB", "FEC", "CAR")) %>% 
+#   group_by(mgmt_zone,month) %>% 
+#   mutate(month_mean_reldis = mean(dis_per_area, na.rm=TRUE),
+#          percent_change_reldis=((dis_per_area - month_mean_reldis)/month_mean_reldis)*100) %>% ungroup %>%  
+#   mutate(MHW = if_else(MHW == 1, "MHW", "Non-MHW"),
+#          MHW = factor(MHW, levels = c("MHW","Non-MHW"))) %>% 
+#   ggplot() +
+#   geom_density(aes(log(dis_per_area*10e5), fill = MHW, color = MHW),
+#                alpha = 0.1)+
+#   theme_minimal()+
+#   facet_wrap(~mgmt_zone, labeller = labeller(mgmt_zone = kspv_NWA), nrow = 4)+
+#   labs(title = "", x = "log(Relative Distance x 10e5)", y = "Density")+
+#   theme(legend.title = element_blank())+
+#   geom_text(data=labels_NWA, aes(label = label, x = -Inf, y = Inf),
+#             hjust = 0, vjust = 1, fontface="bold")
+# 
+
+
+NWA_plot<-MHWCOG_NWA %>%
   mutate(MHW = if_else(MHW == 1, "MHW", "Non-MHW"),
          MHW = factor(MHW, levels = c("MHW","Non-MHW"))) %>% 
-  ggplot() +
-  geom_density(aes(log(dis_per_area*10e5), fill = MHW, color = MHW),
-               alpha = 0.1)+
-  theme_minimal()+
-  facet_wrap(~mgmt_zone, labeller = labeller(mgmt_zone = kspv_NWA), nrow = 4)+
-  labs(title = "", x = "log(Relative Distance x 10e5)", y = "Density")+
-  theme(legend.title = element_blank())+
-  geom_text(data=labels_NWA, aes(label = label, x = -Inf, y = Inf),
-            hjust = 0, vjust = 1, fontface="bold")
-
-
-
-
+  ggplot()+
+  introdataviz::geom_split_violin(aes(mgmt_zone, y=dis_per_area*1000000,
+                                      fill=MHW), alpha = 0.4)+
+  geom_boxplot(aes(mgmt_zone, y=dis_per_area*1000000,fill=MHW),
+               width = .2, alpha = .6, show.legend = FALSE) + 
+  theme_bw()+
+  #north
+  labs(title = "", y = "Relative Distance x 10e5", 
+       x = "", fill = "")+
+  geom_label(ks_pvD_NWA %>% filter(mgmt_zone %in% c("NED","NEC","MAB")), 
+             mapping=aes(x=c(8.2,7.2,6.2), y=185, label = D))+
+  geom_label(ks_pvD_NWA %>% filter(mgmt_zone %in% c("NED","NEC","MAB")), 
+             mapping=aes(x=c(8.2,7.2,6.2), y=160, label = pvalue))+
+  geom_text(ks_pvD_NWA %>% filter(mgmt_zone %in% c("NED","NEC","MAB")), 
+            mapping=aes(x=c(8.2,7.2,6.2),y=176, label = "D:"))+
+  geom_text(ks_pvD_NWA %>% filter(mgmt_zone %in% c("NED","NEC","MAB")), 
+            mapping=aes(x=c(8.2,7.2,6.2),y=147, label = "p-value:"))+
+  #south
+  geom_label(ks_pvD_NWA %>% filter(mgmt_zone %in% c("SAB","SAR","FEC",
+                                                    "GOM","CAR")), 
+             mapping=aes(x=c(5.2,4.2,3.2,2.2,1.2), y=185, label = D),
+             fontface = "bold")+
+  geom_label(ks_pvD_NWA %>% filter(mgmt_zone %in% c("SAB","SAR","FEC",
+                                                    "GOM","CAR")), 
+             mapping=aes(x=c(5.2,4.2,3.2,2.2,1.2), y=160, label = pvalue),
+             fontface = "bold")+
+  geom_text(ks_pvD_NWA %>% filter(mgmt_zone %in% c("SAB","SAR","FEC",
+                                                   "GOM","CAR")), 
+            mapping=aes(x=c(5.2,4.2,3.2,2.2,1.2),y=176, label = "D:"),
+            fontface = "bold")+
+  geom_text(ks_pvD_NWA %>% filter(mgmt_zone %in% c("SAB","SAR","FEC",
+                                                   "GOM","CAR")), 
+            mapping=aes(x=c(5.2,4.2,3.2,2.2,1.2),y=146, label = "p-value:"),
+            fontface = "bold")+
+  coord_flip()
+    
 
 ######
 #TROLL
@@ -455,8 +504,8 @@ MHWCOG_NEP<-left_join(MHWCOG_NEP, area_df, by=c("mgmt_zone")) %>%
 
 
 MHWCOG_NEP$mgmt_zone<-factor(MHWCOG_NEP$mgmt_zone,
-                             levels = c("VN","CL","EK",
-                                        "MT","CP"))
+                             levels = rev(c("VN","CL","EK",
+                                        "MT","CP")))
 
 # MHWCOG<-MHWCOG %>%
 #   mutate(bin = cut_interval(MHWCOG$dis_per_area, n=15)) %>%
@@ -530,41 +579,90 @@ MHWCOG_NEP<-MHWCOG_NEP %>%
          percent_change_reldis=((dis_per_area - month_mean_reldis)/month_mean_reldis)*100) %>% ungroup()
 
 mgmtzones<-unique(as.character(MHWCOG_NEP$mgmt_zone))
-ks<-data.frame(pval=NA)
+ks<-data.frame(mgmt_zone=NA, pvalue=NA, D=NA)
 counter = 1
 for(i in 1:length(mgmtzones)){
   a<-MHWCOG_NEP %>% filter(mgmt_zone == mgmtzones[i])
   b<-a %>% filter(MHW == 1)
   c<-a %>% filter(MHW == 0)
   print(mgmtzones[i])
-  ks[counter,1]<-paste0(mgmtzones[i]," : ",round(ks.test(log(b$dis_per_area),log(c$dis_per_area))$p.value,4))
+  ks_test<-ks.test(log(c$dis_per_area),log(b$dis_per_area),
+                   alternative = 'greater')
+  pvalue<-round(ks_test$p.value,4)
+  d<-round(ks_test$statistic,4)
+  ks[counter,1]<-mgmtzones[i]
+  ks[counter,2]<-pvalue
+  ks[counter,3]<-d
+  
+  
+  #ks[counter,1]<-paste0(mgmtzones[i]," : ","P-value = ",pvalue)
   counter = counter + 1
 }
 
-kspv_NEP <- ks$pval
-names(kspv_NEP) <- unique(as.character(MHWCOG_NEP$mgmt_zone))
+ks_pvD_NEP <- ks
+#names(kspv_NEP) <- unique(as.character(MHWCOG_NEP$mgmt_zone))
+# 
+# labels_NEP<-data.frame(mgmt_zone = factor(c("VN","CL","EK","MT")),
+#                           label = c("(A)","(B)","(C)", "(D)"))
+# #density plots
+# NEP_plot<-MHWCOG_NEP %>% filter(mgmt_zone %in% c("VN","CL","EK","MT")) %>% 
+#   group_by(mgmt_zone,month) %>% 
+#   mutate(month_mean_reldis = mean(dis_per_area, na.rm=TRUE),
+#          percent_change_reldis=((dis_per_area - month_mean_reldis)/month_mean_reldis)*100) %>% ungroup %>%  
+#   mutate(MHW = if_else(MHW == 1, "MHW", "Non-MHW"),
+#          MHW = factor(MHW, levels = c("MHW","Non-MHW"))) %>% 
+#   ggplot() +
+#   geom_density(aes(log(dis_per_area*10e5), fill = MHW, color = MHW),
+#                alpha = 0.1, show.legend = FALSE)+
+#   theme_minimal()+
+#   facet_wrap(~mgmt_zone, labeller = labeller(mgmt_zone = kspv_NEP),nrow = 4)+
+#   labs(title = "", x = "log(Relative Distance x 10e5)", y = "Density")+
+#   theme(legend.title = element_blank())+
+#   geom_text(data=labels_NEP, aes(label = label, x = -Inf, y = Inf),
+#             hjust = 0, vjust = 1, fontface="bold")
 
-labels_NEP<-data.frame(mgmt_zone = factor(c("VN","CL","EK","MT")),
-                          label = c("(A)","(B)","(C)", "(D)"))
-#density plots
-NEP_plot<-MHWCOG_NEP %>% filter(mgmt_zone %in% c("VN","CL","EK","MT")) %>% 
-  group_by(mgmt_zone,month) %>% 
-  mutate(month_mean_reldis = mean(dis_per_area, na.rm=TRUE),
-         percent_change_reldis=((dis_per_area - month_mean_reldis)/month_mean_reldis)*100) %>% ungroup %>%  
+
+
+NEP_plot<-MHWCOG_NEP %>%
   mutate(MHW = if_else(MHW == 1, "MHW", "Non-MHW"),
          MHW = factor(MHW, levels = c("MHW","Non-MHW"))) %>% 
-  ggplot() +
-  geom_density(aes(log(dis_per_area*10e5), fill = MHW, color = MHW),
-               alpha = 0.1, show.legend = FALSE)+
-  theme_minimal()+
-  facet_wrap(~mgmt_zone, labeller = labeller(mgmt_zone = kspv_NEP),nrow = 4)+
-  labs(title = "", x = "log(Relative Distance x 10e5)", y = "Density")+
-  theme(legend.title = element_blank())+
-  geom_text(data=labels_NEP, aes(label = label, x = -Inf, y = Inf),
-            hjust = 0, vjust = 1, fontface="bold")
+  filter(mgmt_zone %in% c("VN","CL","EK","MT")) %>% 
+  ggplot()+
+  introdataviz::geom_split_violin(aes(mgmt_zone, y=dis_per_area*1000000,
+                                      fill=MHW), alpha = 0.4,show.legend = FALSE)+
+  geom_boxplot(aes(mgmt_zone, y=dis_per_area*1000000,fill=MHW),
+               width = .2, alpha = .6, show.legend = FALSE) + 
+  theme_bw()+
+  labs(title = "", y = "Relative Distance x 10e5", 
+       x = "")+
+  #peripheral
+  geom_label(ks_pvD_NEP %>% filter(mgmt_zone %in% c("VN","MT")), 
+             mapping=aes(x=c(1.1,4.1), y=510, label = D),
+             fontface = "bold")+
+  geom_label(ks_pvD_NEP %>% filter(mgmt_zone %in% c("VN","MT")), 
+             mapping=aes(x=c(1.1,4.1), y=400, label = pvalue),
+             fontface = "bold")+
+  geom_text(ks_pvD_NEP %>% filter(mgmt_zone %in% c("VN","MT")), 
+            mapping=aes(x=c(1.1,4.1),y=540, label = "D:"),
+            fontface = "bold")+
+  geom_text(ks_pvD_NEP %>% filter(mgmt_zone %in% c("VN","MT")), 
+            mapping=aes(x=c(1.1,4.1),y=447, label = "p-value:"),
+            fontface = "bold")+
+  #central
+  geom_label(ks_pvD_NEP %>% filter(mgmt_zone %in% c("CL","EK")), 
+             mapping=aes(x=c(2.1,3.1), y=510, label = D))+
+  geom_label(ks_pvD_NEP %>% filter(mgmt_zone %in% c("CL","EK")), 
+             mapping=aes(x=c(2.1,3.1), y=400, label = pvalue))+
+  geom_text(ks_pvD_NEP %>% filter(mgmt_zone %in% c("CL","EK")), 
+            mapping=aes(x=c(2.1,3.1),y=540, label = "D:"))+
+  geom_text(ks_pvD_NEP %>% filter(mgmt_zone %in% c("CL","EK")), 
+            mapping=aes(x=c(2.1,3.1),y=445, label = "p-value:"))+
+  coord_flip()+scale_y_reverse()+scale_x_discrete(position = "top")
 
 
 
 
-NEP_plot + NWA_plot
+
+cowplot::plot_grid(NEP_plot,NWA_plot,labels = c('A', 'B'), label_size = 12,
+                   rel_widths = c(1,1.5))
 

@@ -311,13 +311,13 @@ ggplot() +
 
 #PLL
 NWAPLL_MHW_total<-here("data","Mgmt_zone","NWA_PLL","NWAPLL_MHW_total.rds") %>% 
-  readRDS() %>% dplyr::select(mgmt_zone,MHW,date,prop_MHW_cells,mean_SSTa,prop_habitat_cells, duration_months, event_index)
+  readRDS() %>% dplyr::select(mgmt_zone,MHW,date,prop_MHW_cells,mean_SSTa,prop_habitat_cells, duration_months,sequence_months, event_index)
 
 #TROLL
 NEPTROLL_MHW_total<-here("data","Mgmt_zone","NEP_TROLL",
                          "NEPTROLL_MHW_total.rds") %>% 
   readRDS() %>% filter(mgmt_zone != "CP") %>% 
-  dplyr::select(mgmt_zone,MHW,date,prop_MHW_cells,mean_SSTa,prop_habitat_cells, duration_months, event_index)
+  dplyr::select(mgmt_zone,MHW,date,prop_MHW_cells,mean_SSTa,prop_habitat_cells, duration_months,sequence_months, event_index)
 
 MHW_total<-rbind(NWAPLL_MHW_total,NEPTROLL_MHW_total) %>% 
   mutate(mgmt_zone = factor(mgmt_zone, levels = c("VN","CL","EK","MT",
@@ -325,53 +325,56 @@ MHW_total<-rbind(NWAPLL_MHW_total,NEPTROLL_MHW_total) %>%
                                                   "SAR","FEC","GOM","CAR")))
 
 
-MHW_total %>% filter(MHW == 1) %>% 
-  group_by(mgmt_zone) %>% 
-  summarise(Totalmonths=sum(MHW),
-            mediansize=quantile(prop_MHW_cells)[3] %>% round(.,2),
-            Q25size = quantile(prop_MHW_cells)[2]%>% round(.,2),
-            Q75size = quantile(prop_MHW_cells)[4]%>% round(.,2),
-            medianintensity=quantile(mean_SSTa)[3]%>% round(.,2),
-            Q25intensity = quantile(mean_SSTa)[2]%>% round(.,2),
-            Q75intensity = quantile(mean_SSTa)[4]%>% round(.,2),
-            medianhabsize=quantile(prop_habitat_cells)[3]%>% round(.,2),
-            Q25habsize = quantile(prop_habitat_cells)[2]%>% round(.,2),
-            Q75habsize = quantile(prop_habitat_cells)[4]%>% round(.,2),) %>% 
-  View()
-
-MHW_total %>% filter(MHW == 1) %>% 
-  group_by(mgmt_zone) %>% 
-  summarise(Totalmonths=sum(MHW),
-            meansize=mean(prop_MHW_cells, na.rm=TRUE) %>% round(.,2),
-            Minsize = min(prop_MHW_cells) %>% round(.,2),
-            Maxsize = max(prop_MHW_cells) %>% round(.,2),
-            meanintensity=mean(mean_SSTa, na.rm=TRUE)%>% round(.,2),
-            Minintensity = min(mean_SSTa) %>% round(.,2),
-            Maxintensity = max(mean_SSTa) %>% round(.,2),
-            meanhabsize=mean(prop_habitat_cells, na.rm=TRUE)%>% round(.,2),
-            Minhabsize = min(prop_habitat_cells) %>% round(.,2),
-            Maxhabsize = max(prop_habitat_cells) %>% round(.,2),
-            Minduration = min(duration_months) %>% round(.,2),
-            Maxduration = max(duration_months) %>% round(.,2)) %>% 
-  View()
+# MHW_total %>% filter(MHW == 1) %>% 
+#   group_by(mgmt_zone) %>% 
+#   summarise(Totalmonths=sum(MHW),
+#             mediansize=quantile(prop_MHW_cells)[3] %>% round(.,2),
+#             Q25size = quantile(prop_MHW_cells)[2]%>% round(.,2),
+#             Q75size = quantile(prop_MHW_cells)[4]%>% round(.,2),
+#             medianintensity=quantile(mean_SSTa)[3]%>% round(.,2),
+#             Q25intensity = quantile(mean_SSTa)[2]%>% round(.,2),
+#             Q75intensity = quantile(mean_SSTa)[4]%>% round(.,2),
+#             medianhabsize=quantile(prop_habitat_cells)[3]%>% round(.,2),
+#             Q25habsize = quantile(prop_habitat_cells)[2]%>% round(.,2),
+#             Q75habsize = quantile(prop_habitat_cells)[4]%>% round(.,2),) %>% 
+#   View()
+# 
+# MHW_total %>% filter(MHW == 1) %>% 
+#   group_by(mgmt_zone) %>% 
+#   summarise(Totalmonths=sum(MHW),
+#             meansize=mean(prop_MHW_cells, na.rm=TRUE) %>% round(.,2),
+#             Minsize = min(prop_MHW_cells) %>% round(.,2),
+#             Maxsize = max(prop_MHW_cells) %>% round(.,2),
+#             meanintensity=mean(mean_SSTa, na.rm=TRUE)%>% round(.,2),
+#             Minintensity = min(mean_SSTa) %>% round(.,2),
+#             Maxintensity = max(mean_SSTa) %>% round(.,2),
+#             meanhabsize=mean(prop_habitat_cells, na.rm=TRUE)%>% round(.,2),
+#             Minhabsize = min(prop_habitat_cells) %>% round(.,2),
+#             Maxhabsize = max(prop_habitat_cells) %>% round(.,2),
+#             Minduration = min(duration_months) %>% round(.,2),
+#             Maxduration = max(duration_months) %>% round(.,2)) %>% 
+#   View()
 
 
 a<-MHW_total %>% 
   ggplot(aes(x = mgmt_zone, y=mean_SSTa))+
   geom_boxplot(color = "red")+
+  stat_summary(fun=mean, geom="point", shape=8, size=1.5) +
   theme_bw() +
   labs(x = "Management Area",y = "MHW Intensity")
 
 b<-MHW_total %>%
   ggplot(aes(x = mgmt_zone, y=prop_MHW_cells))+
   geom_boxplot(color = "Orange")+
+  stat_summary(fun=mean, geom="point", shape=8, size=1.5) +
   theme_bw() +
   labs(x = "Management Area",y = "MHW Size")
 
 c<-MHW_total %>% filter(MHW == 1) %>%
-  dplyr::select(mgmt_zone,event_index,duration_months) %>% unique() %>%  
-  ggplot(aes(x = mgmt_zone, y=duration_months))+
+  dplyr::select(mgmt_zone,event_index,sequence_months) %>%  
+  ggplot(aes(x = mgmt_zone, y=sequence_months))+
   geom_boxplot(color = "gold")+
+  stat_summary(fun=mean, geom="point", shape=8, size=1.5) +
   theme_bw() +
   labs(x = "Management Area",y = "MHW Duration")
 
@@ -382,13 +385,13 @@ c<-MHW_total %>% filter(MHW == 1) %>%
 #   theme_bw()+
 #   labs(x = "Management Area",y = "Habitat Size")
 
-d<-MHW_total %>% filter(MHW == 1) %>% 
-  group_by(mgmt_zone) %>% 
-  summarise(Totalmonths=sum(MHW)) %>% 
-  ggplot(aes(x = mgmt_zone, y=Totalmonths))+
-  geom_bar(stat = "identity", position = position_dodge(), alpha = 0.75, fill = "salmon")+
-  theme_bw()+
-  labs(x = "Management Area",y = "Total MHW Months")
+# d<-MHW_total %>% filter(MHW == 1) %>% 
+#   group_by(mgmt_zone) %>% 
+#   summarise(Totalmonths=sum(MHW)) %>% 
+#   ggplot(aes(x = mgmt_zone, y=Totalmonths))+
+#   geom_bar(stat = "identity", position = position_dodge(), alpha = 0.75, fill = "salmon")+
+#   theme_bw()+
+#   labs(x = "Management Area",y = "Total MHW Months")
 
 #frequency
 d<-MHW_total %>% filter(MHW == 1) %>%
@@ -403,57 +406,33 @@ d<-MHW_total %>% filter(MHW == 1) %>%
 cowplot::plot_grid(a,b,c,d, align = "hv",labels = c('(A)','(B)','(C)','(D)'), label_size = 10,nrow=2)
 
 
-#spatially correlated by mgmt areas
-#size
-MHW_total %>% filter(MHW == 1) %>%
+
+###looking at how intensity and size varied/differed between NWA mgmt areas
+#intensity
+#ANOVA
+intensity_aov<-MHW_total %>%
   filter(mgmt_zone %in% c("NED","NEC","MAB",
                           "SAB","SAR","FEC",
-                          "GOM","CAR")) %>% 
-  dplyr::select(mgmt_zone,prop_MHW_cells,date) %>% 
-  spread(mgmt_zone,prop_MHW_cells) %>% 
-  dplyr::select(-date) %>%
-  #cor(.,use="pairwise.complete.obs") %>% 
-  mutate_if(is.numeric, ~replace(., is.na(.), 0)) %>% 
-  cor(.) %>% 
-  corrplot::corrplot(type="upper")
-  
-###intensity 
-MHW_total %>% filter(MHW == 1) %>%
-  filter(mgmt_zone %in% c("NED","NEC","MAB",
-                          "SAB","SAR","FEC",
-                          "GOM","CAR")) %>% 
-  dplyr::select(mgmt_zone,mean_SSTa,date) %>% 
-  spread(mgmt_zone,mean_SSTa) %>% 
-  dplyr::select(-date) %>%
-  #cor(.,use="pairwise.complete.obs") %>% 
-  mutate_if(is.numeric, ~replace(., is.na(.), 0)) %>% 
-  cor(.) %>% 
-  corrplot::corrplot(type="upper")
-
-
-
-intensity_aov<-MHW_total %>% filter(MHW == 1) %>%
-  filter(mgmt_zone %in% c("NED","NEC","MAB",
-                          "SAB","SAR","FEC",
-                          "GOM","CAR")) %>% 
-  dplyr::select(mgmt_zone,mean_SSTa) %>% 
+                          "GOM","CAR")) %>%
+  filter(prop_MHW_cells > 0) %>% 
+  dplyr::select(mgmt_zone,mean_SSTa) %>%  
   aov(mean_SSTa ~ mgmt_zone, data = .)
 
 summary(intensity_aov)
+TukeyHSD(intensity_aov, conf.level=.95)
 
-plot(TukeyHSD(intensity_aov, conf.level=.95))
-
-intensity_df<-MHW_total %>% filter(MHW == 1) %>%
+#pairwise t-test
+intensity_df<-MHW_total %>% 
   filter(mgmt_zone %in% c("NED","NEC","MAB",
                           "SAB","SAR","FEC",
                           "GOM","CAR")) %>% 
   dplyr::select(mgmt_zone,mean_SSTa) 
 
-#pairwise t-test 
+ 
 pairwise.t.test(intensity_df$mean_SSTa,intensity_df$mgmt_zone) 
 
-###size
-size_aov<-MHW_total %>% filter(MHW == 1) %>%
+#size
+size_aov<-MHW_total %>% 
   filter(mgmt_zone %in% c("NED","NEC","MAB",
                           "SAB","SAR","FEC",
                           "GOM","CAR")) %>% 
@@ -461,17 +440,75 @@ size_aov<-MHW_total %>% filter(MHW == 1) %>%
   aov(prop_MHW_cells ~ mgmt_zone, data = .)
 
 summary(size_aov)
-
 TukeyHSD(size_aov, conf.level=.95)
 
-
-size_df<-MHW_total %>% filter(MHW == 1) %>%
+#pairwise t-test
+size_df<-MHW_total %>% 
   filter(mgmt_zone %in% c("NED","NEC","MAB",
                           "SAB","SAR","FEC",
                           "GOM","CAR")) %>% 
   dplyr::select(mgmt_zone,prop_MHW_cells) 
 
-#pairwise t-test with bonferroni p-value adjustment
 pairwise.t.test(size_df$prop_MHW_cells,size_df$mgmt_zone) 
 
 
+#duration
+duration_aov<-MHW_total %>% filter(MHW == 1) %>%
+  filter(mgmt_zone %in% c("NED","NEC","MAB",
+                          "SAB","SAR","FEC",
+                          "GOM","CAR")) %>% 
+  dplyr::select(mgmt_zone,sequence_months) %>% 
+  aov(sequence_months ~ mgmt_zone, data = .)
+
+summary(duration_aov)
+TukeyHSD(duration_aov, conf.level=.95)
+
+###looking at how intensity and size varied/differed between NEP mgmt areas
+#intensity
+
+#ANOVA
+intensity_aov<-MHW_total %>% 
+  filter(mgmt_zone %in% c("VN","EK",
+                          "CL","MT")) %>% 
+  dplyr::select(mgmt_zone,mean_SSTa) %>% 
+  aov(mean_SSTa ~ mgmt_zone, data = .)
+
+summary(intensity_aov)
+TukeyHSD(intensity_aov, conf.level=.95)
+
+#pairwise t-test
+intensity_df<-MHW_total %>% 
+  filter(mgmt_zone %in% c("VN","EK",
+                          "CL","MT")) %>% 
+  dplyr::select(mgmt_zone,mean_SSTa) 
+
+
+pairwise.t.test(intensity_df$mean_SSTa,intensity_df$mgmt_zone) 
+
+#size
+size_aov<-MHW_total %>% 
+  filter(mgmt_zone %in% c("VN","EK",
+                          "CL","MT")) %>% 
+  dplyr::select(mgmt_zone,prop_MHW_cells) %>% 
+  aov(prop_MHW_cells ~ mgmt_zone, data = .)
+
+summary(size_aov)
+TukeyHSD(size_aov, conf.level=.95)
+
+#pairwise t-test
+size_df<-MHW_total %>% 
+  filter(mgmt_zone %in% c("VN","EK",
+                          "CL","MT")) %>% 
+  dplyr::select(mgmt_zone,prop_MHW_cells) 
+
+pairwise.t.test(size_df$prop_MHW_cells,size_df$mgmt_zone)
+
+#duration
+duration_aov<-MHW_total %>% 
+  filter(mgmt_zone %in% c("VN","EK",
+                          "CL","MT")) %>% 
+  dplyr::select(mgmt_zone,sequence_months) %>% 
+  aov(sequence_months ~ mgmt_zone, data = .)
+
+summary(duration_aov)
+TukeyHSD(duration_aov, conf.level=.95)

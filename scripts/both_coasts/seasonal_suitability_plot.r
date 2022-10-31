@@ -48,12 +48,12 @@ idx<-case_when(dates %>% lubridate::month(.) %in% c(12,1,2)~ "winter",
 NWA_PLL_seasonal<-stackApply(NWA_PLL_pred,idx, fun = mean, na.rm = TRUE)
 
 NWA_PLL_seasonal<-rasterToPoints(NWA_PLL_seasonal) %>% as.data.frame() %>% 
-  rename("Winter - DFJ"="index_winter",
+  rename("Winter - DJF"="index_winter",
          "Summer - JJA"="index_summer",
          "Spring - MAM"="index_spring",
          "Fall - SON"="index_fall") %>% 
   gather("season","suitability",-x,-y) %>% 
-  mutate(season = factor(season, levels = c("Winter - DFJ","Spring - MAM",
+  mutate(season = factor(season, levels = c("Winter - DJF","Spring - MAM",
                                             "Summer - JJA","Fall - SON")))
 
 NWA_PLL_plot<-NWA_PLL_seasonal %>% 
@@ -117,3 +117,4 @@ NEP_TROLL_plot<-NEP_TROLL_seasonal %>%
                    legend.position = "none")
 
 NEP_TROLL_plot | NWA_PLL_plot
+

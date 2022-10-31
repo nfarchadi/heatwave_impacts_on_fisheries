@@ -35,33 +35,34 @@ get_AIS<-function(year, bq_path, x_max, x_min, y_max, y_min, country, gear_type,
 
 
 
-USAtroll2012<-get_AIS(2012, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -117, -180, 60, 30, "USA", "trollers", 1)
+USA_NWA_PLL_2012<-get_AIS(2012, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -30, -100, 50, 10, "USA", "drifting_longlines", 0)
 
-USAtroll2013<-get_AIS(2013, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -117, -180, 60, 30, "USA", "trollers", 1)
+USA_NWA_PLL_2013<-get_AIS(2013, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -30, -100, 50, 10, "USA", "drifting_longlines", 0)
 
-USAtroll2014<-get_AIS(2014, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -117, -180, 60, 30, "USA", "trollers", 1)
+USA_NWA_PLL_2014<-get_AIS(2014, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -30, -100, 50, 10, "USA", "drifting_longlines", 0)
 
-USAtroll2015<-get_AIS(2015, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -117, -180, 60, 30, "USA", "trollers", 1)
+USA_NWA_PLL_2015<-get_AIS(2015, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -30, -100, 50, 10, "USA", "drifting_longlines", 0)
 
-USAtroll2016<-get_AIS(2016, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -117, -180, 60, 30, "USA", "trollers", 1)
+USA_NWA_PLL_2016<-get_AIS(2016, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -30, -100, 50, 10, "USA", "drifting_longlines", 0)
 
-USAtroll2017<-get_AIS(2017, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -117, -180, 60, 30, "USA", "trollers", 1)
+USA_NWA_PLL_2017<-get_AIS(2017, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -30, -100, 50, 10, "USA", "drifting_longlines", 0)
 
-USAtroll2018<-get_AIS(2018, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -117, -180, 60, 30, "USA", "trollers", 1)
+USA_NWA_PLL_2018<-get_AIS(2018, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -30, -100, 50, 10, "USA", "drifting_longlines", 0)
 
-USAtroll2019<-get_AIS(2019, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -117, -180, 60, 30, "USA", "trollers", 1)
+USA_NWA_PLL_2019<-get_AIS(2019, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -30, -100, 50, 10, "USA", "drifting_longlines", 0)
 
-USAtroll2020<-get_AIS(2020, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -117, -180, 60, 30, "USA", "trollers", 1)
+USA_NWA_PLL_2020<-get_AIS(2020, "C:/Users/nfarc/Desktop/NASA_FaCeT/NASA-FaCeT/pipelines/AIS/R/facet-ais-credentials.json", -30, -100, 50, 10, "USA", "drifting_longlines", 0)
 
 
 
-USAtroll<-rbind(USAtroll2012,USAtroll2013,USAtroll2014,USAtroll2015,USAtroll2016,USAtroll2017,USAtroll2018,USAtroll2019,USAtroll2020)
+USA_NWA_PLL<-rbind(USA_NWA_PLL_2012,USA_NWA_PLL_2013,USA_NWA_PLL_2014,
+                   USA_NWA_PLL_2015,USA_NWA_PLL_2016,USA_NWA_PLL_2017,
+                   USA_NWA_PLL_2018,USA_NWA_PLL_2019,USA_NWA_PLL_2020)
 
-saveRDS(USAtroll, "E:/Chapter2_JSDM/AIS_USA_troll/AIS_USA_Pacific_troll_2012_2020_hoursabove1")
+colnames(USA_NWA_PLL)<-c("date","lat","lon","fishing_hours")
 
-colnames(USAtroll)<-c("date","lat","lon")
+saveRDS(USA_NWA_PLL, here("data","AIS_processed","NWA_PLL","AIS_USA_NWA_PLL_2013_2020.rds"))
 
-USAtroll<-readRDS("E:/Chapter2_JSDM/AIS_USA_troll/AIS_USA_Pacific_troll_2012_2020_hoursabove1")
 
 #GFW AIS data exploration
 library(tidyverse)
@@ -89,11 +90,11 @@ bzz <- c(1,10,100,1000,10000)
 
 
 
-NEP_troll_plot<-USAtroll %>%  ggplot() +
+NWA_PLL_plot<-USA_NWA_PLL %>% filter(fishing_hours >= 2) %>%   ggplot() +
   #geom_sf(data = world, color= "black", fill = "grey" ) + #bring in world data
   geom_path(data = map_data("world"),
             aes(x=long, y=lat, group = group)) +
-  coord_fixed(xlim = c(-180,-112), ylim = c(30,60)) + #changing the extent
+  coord_fixed(xlim = c(-100,-30), ylim = c(10,50)) + #changing the extent
   ylab("Latitude") + xlab("Longitude") + 
   geom_bin2d(aes(x=lon, y=lat), binwidth=.5) +
   #geom_rect(mapping=aes(xmin=-100, xmax=-30, ymin=10, ymax=50), color="red", size = 1, alpha = 0) + 
@@ -112,7 +113,7 @@ NEP_troll_plot<-USAtroll %>%  ggplot() +
 
 
 
-NEP_troll_plot
+NWA_PLL_plot
 
 
 

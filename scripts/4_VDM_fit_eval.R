@@ -7,7 +7,7 @@ library(lubridate)
 ####------load and process data------####
 
 ##updated data set with new ports (do not use). If I use this skip down to line 53 to fitting the BRT because this data set has already filtered for >=2 fishing hours and adding lunar column
-NWA_PLL<-readRDS("E:/VDM_results/NWA_gbm_convexhull/Pres_Abs_2013to2020_NWA_USA_LL_onlyfishing_v2_1to1ratio_absenceconstrained_convexhull_portsupdated_lunar.rds")
+#NWA_PLL<-readRDS("E:/VDM_results/NWA_gbm_convexhull/Pres_Abs_2013to2020_NWA_USA_LL_onlyfishing_v2_1to1ratio_absenceconstrained_convexhull_portsupdated_lunar.rds")
 
 
 setwd("C:/Users/nfarc/Desktop/NASA_FaCeT/Data/2_AIS_wENV/processed")
@@ -45,8 +45,8 @@ NWA_PLL$lunar <- lunar::lunar.illumination(NWA_PLL$date)
 #NWA_longline_2012to2016 <- NWA_longline_2012to2016[!is.infinite(rowSums(NWA_longline_2012to2016[7:17])),]
 
 #checking for multi-collinearity
-library("PerformanceAnalytics")
-chart.Correlation(NWA_PLL[,12:23],method="pearson",histogram=TRUE)
+#library("PerformanceAnalytics")
+#chart.Correlation(NWA_PLL[,12:23],method="pearson",histogram=TRUE)
 
 
 
@@ -55,14 +55,14 @@ lr<-((0.0000017 * nrow(NWA_PLL)) - 0.000191) * (4:8)
 lr<-lr[3]
 set.seed(124)#for reproducibility 
 start_time<-Sys.time()
-brt <- dismo::gbm.fixed(data=NWA_PLL, 
+brt <- dismo::gbm.step(data=NWA_PLL, 
                         gbm.x= c(12:19,22,23),  
                         gbm.y= 11, ### response variable
                         family = "bernoulli",
                         tree.complexity = 3, ### complexity of the interactions that the model will fit
                         learning.rate = lr,  ### optimized to end up with >1000 trees
-                        bag.fraction = 0.6,### recommended by Elith, amount of input data used each time
-                        n.trees = 5000)
+                        bag.fraction = 0.6### recommended by Elith, amount of input data used each time
+                        )
 
 end_time<-Sys.time()
 end_time - start_time #time difference
@@ -81,7 +81,7 @@ ggsave(path="C:/Users/nfarc/Desktop/NASA_FaCeT/Plots",
 
 
 #save the model
-saveRDS(brt, "E:/VDM_results/NWA_gbm_convexhull/brt_v2_updatedports.rds")
+saveRDS(brt, "E:/VDM_results/NWA_gbm_convexhull/brt_v2_gbm_step.rds")
 
 
 

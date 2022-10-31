@@ -392,7 +392,7 @@ cowplot::plot_grid(Tp,Lp, align = "v")
 #both coasts at the same time
 #############################
 
-###############################################################
+#load the data
 NWAPLLa_MHW_total<-here("data","Mgmt_zone","NWA_PLL","NWAPLLa_MHW_total.rds") %>%
   readRDS() %>% 
   dplyr::select(prop_MHW_cells,mean_SSTa,mgmt_zone,NWA_PLL.area.anomaly) %>% 
@@ -403,39 +403,41 @@ NEPTROLLa_MHW_total<-here("data","Mgmt_zone","NEP_TROLL","NEPTROLLa_MHW_total.rd
   rename("percent_change"="NEP_TROLL.area.anomaly") %>% 
   filter(mgmt_zone != "CP")
 
-all_MHW_total<-rbind(NWAPLLa_MHW_total_scaled, NEPTROLLa_MHW_total_scaled)
+#bind together
+all_MHW_total<-rbind(NWAPLLa_MHW_total, NEPTROLLa_MHW_total)
 
+#lets normalize/scale the data so we can better interpret the LMM coeifficents
 all_MHW_total<-all_MHW_total %>% 
   na.omit() %>% 
   mutate(prop_MHW_cells = scale(prop_MHW_cells),
          mean_SSTa = scale(mean_SSTa)) %>% 
   as.data.frame()
 
-# #lets normalize/scale the data so we can better interpret the reg coeifficents
-NWAPLLa_MHW_total_scaled<-NWAPLLa_MHW_total %>%
-  na.omit() %>%
-  mutate(prop_MHW_area = scale(prop_MHW_area), #center and scales by default
-         mean_SSTa = scale(mean_SSTa),
-         n.cell_MHW = scale(n.cell_MHW),
-         mean_SSTa = as.numeric(mean_SSTa)) %>% 
-  as.data.frame() %>% 
-  dplyr::select(prop_MHW_cells,mean_SSTa,mgmt_zone,NWA_PLL.area.anomaly) %>% 
-  rename("percent_change"="NWA_PLL.area.anomaly")
+# # #lets normalize/scale the data so we can better interpret the reg coeifficents
+# NWAPLLa_MHW_total_scaled<-NWAPLLa_MHW_total %>%
+#   na.omit() %>%
+#   mutate(prop_MHW_area = scale(prop_MHW_area), #center and scales by default
+#          mean_SSTa = scale(mean_SSTa),
+#          n.cell_MHW = scale(n.cell_MHW),
+#          mean_SSTa = as.numeric(mean_SSTa)) %>% 
+#   as.data.frame() %>% 
+#   dplyr::select(prop_MHW_cells,mean_SSTa,mgmt_zone,NWA_PLL.area.anomaly) %>% 
+#   rename("percent_change"="NWA_PLL.area.anomaly")
+# 
+# NEPTROLLa_MHW_total<-here("data","Mgmt_zone","NEP_TROLL","NEPTROLLa_MHW_total.rds") %>% readRDS()
+# 
+# # #lets normalize/scale the data so we can better interpret the reg coeifficents
+# NEPTROLLa_MHW_total_scaled<-NEPTROLLa_MHW_total %>%
+#   na.omit() %>%
+#   mutate(prop_MHW_area = scale(prop_MHW_area), #center and scales by default
+#          mean_SSTa = scale(mean_SSTa) %>% as.numeric(),
+#          n.cell_MHW = scale(n.cell_MHW)) %>% 
+#   as.data.frame() %>% 
+#   dplyr::select(prop_MHW_cells,mean_SSTa,mgmt_zone,NEP_TROLL.area.anomaly) %>% 
+#   rename("percent_change"="NEP_TROLL.area.anomaly") %>% 
+#   filter(mgmt_zone != "CP")
 
-NEPTROLLa_MHW_total<-here("data","Mgmt_zone","NEP_TROLL","NEPTROLLa_MHW_total.rds") %>% readRDS()
-
-# #lets normalize/scale the data so we can better interpret the reg coeifficents
-NEPTROLLa_MHW_total_scaled<-NEPTROLLa_MHW_total %>%
-  na.omit() %>%
-  mutate(prop_MHW_area = scale(prop_MHW_area), #center and scales by default
-         mean_SSTa = scale(mean_SSTa) %>% as.numeric(),
-         n.cell_MHW = scale(n.cell_MHW)) %>% 
-  as.data.frame() %>% 
-  dplyr::select(prop_MHW_cells,mean_SSTa,mgmt_zone,NEP_TROLL.area.anomaly) %>% 
-  rename("percent_change"="NEP_TROLL.area.anomaly") %>% 
-  filter(mgmt_zone != "CP")
-
-all_MHW_total<-rbind(NWAPLLa_MHW_total_scaled, NEPTROLLa_MHW_total_scaled)
+#all_MHW_total<-rbind(NWAPLLa_MHW_total_scaled, NEPTROLLa_MHW_total_scaled)
 
 MHW_glmm<-lmerTest::lmer(percent_change ~ prop_MHW_cells + mean_SSTa + 
                            (1|mgmt_zone)+
@@ -443,9 +445,11 @@ MHW_glmm<-lmerTest::lmer(percent_change ~ prop_MHW_cells + mean_SSTa +
                            (0+mean_SSTa|mgmt_zone), 
                          data = all_MHW_total)
 
+#same as above
+
 MHW_glmm<-lmerTest::lmer(percent_change ~ prop_MHW_cells + mean_SSTa +
-                           (1+prop_MHW_cells+mean_SSTa||mgmt_zone), 
-                         data = all_MHW_total %>% filter(percent_change !=100))
+                           (1+prop_MHW_cells+mean_SSTa|mgmt_zone),
+                         data = all_MHW_total)
 
 
 # MHW_glmm<-lmList(percent_change ~ prop_MHW_cells + mean_SSTa|mgmt_zone , data = all_MHW_total, na.action = na.omit)
@@ -638,7 +642,7 @@ Lp<-mgmt_zone_variables_BOTH%>%
 
 cowplot::plot_grid(Tp,Lp,labels = c('A', 'B'), label_size = 12)
 
-Tp | Lp
+#Tp | Lp
 
 
 
@@ -671,9 +675,9 @@ colnames(mgmtzone_centroid)<-c("mgmt_zone","X","Y")
 
 
 #combine both coasts coef df
-mgmt_zone_coef<-coefficients(MHW_glmm)
+mgmt_zone_coef<-coefficients(MHW_glmm)$mgmt_zone
 
-mgmt_zone_coef<-mgmt_zone_coef %>%
+mgmt_zone_coef<-mgmt_zone_coef %>%  
   tibble::rownames_to_column("mgmt_zone") %>% 
   mutate(Fishery = case_when(mgmt_zone %in% c("NED","NEC", "MAB",
                                               "SAB","SAR","FEC",
