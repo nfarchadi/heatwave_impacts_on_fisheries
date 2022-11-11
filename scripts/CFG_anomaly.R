@@ -140,21 +140,21 @@ CFG_anomalies<-CFG_anomalies %>%
 CFG_anomalies<-here("data","Monthly_Spatial_Predictions","NWA_PLL",
                                   "NWA_PLL_CFG_anomalies.rds") %>% readRDS()
 
-CFG_anomalies<-CFG_anomalies %>% sf::st_as_sf(coords = c("x","y"), crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") %>% 
-  st_join(NWA_PLL_zones)
-                    
-
-CFG_anomalies<-CFG_anomalies %>% 
-  mutate(month=lubridate::month(date),
-         season = case_when(month %in% c(12,1,2)~ "winter",
-                            month %in% c(3,4,5)~ "spring",
-                            month %in% c(6,7,8)~ "summer",
-                            month %in% c(9,10,11)~ "fall")) %>% 
-  group_by(x,y,season) %>% 
-  summarise(CFG_anomaly = mean(CFG_anomaly, na.rm=TRUE),.groups = "drop") %>% 
-  mutate(Change = case_when(CFG_anomaly > 0 ~ "Gain",
-                            CFG_anomaly < 0 ~ "Loss",
-                            CFG_anomaly == 0 ~ "No Change"))
+# CFG_anomalies<-CFG_anomalies %>% sf::st_as_sf(coords = c("x","y"), crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") %>% 
+#   st_join(NWA_PLL_zones)
+#                     
+# 
+# CFG_anomalies<-CFG_anomalies %>% 
+#   mutate(month=lubridate::month(date),
+#          season = case_when(month %in% c(12,1,2)~ "winter",
+#                             month %in% c(3,4,5)~ "spring",
+#                             month %in% c(6,7,8)~ "summer",
+#                             month %in% c(9,10,11)~ "fall")) %>% 
+#   group_by(x,y,season) %>% 
+#   summarise(CFG_anomaly = mean(CFG_anomaly, na.rm=TRUE),.groups = "drop") %>% 
+#   mutate(Change = case_when(CFG_anomaly > 0 ~ "Gain",
+#                             CFG_anomaly < 0 ~ "Loss",
+#                             CFG_anomaly == 0 ~ "No Change"))
 
 
 
@@ -192,31 +192,31 @@ CFG_anomalies<-CFG_anomalies %>%
 #   theme_bw()
 
 
+CFG_anomalies<-CFG_anomalies %>%
+  filter(x >= -60 & x <= -40 & y >=40) 
 
-
-CFG_anomalies %>%
+hab_change2012<-CFG_anomalies %>%
   #filter(x >= -60 & x <= -40 & y >=40) %>% 
-  filter(date == "May 2012" & Change != "NA") %>%
+  filter(date == "Apr 2012" & Change != "NA") %>%
   dplyr::select(x,y,Change) %>% 
   ggplot() +
   geom_tile(aes(x=x,y=y, fill = Change), )+
   geom_sf(data = NWA_PLL_zones, color = "black", fill = NA, size = 1)+
   geom_sf(data = world, color= "black", fill = "grey")+
-  #geom_label(aes(x = -56, y = 48.5,label = "May 2012")) +
-  scale_fill_manual(values = c("#A2FC3CFF", "#7A0403FF", "#30123BFF"))+
-  coord_sf(xlim = c(-97.5, -40), ylim = c(11.5, 48.5), expand = TRUE) +
+  geom_label(aes(x = -56, y = 48.5,label = "April 2012")) +
+  scale_fill_manual(values = c("yellow", "red", "black"))+
+  coord_sf(xlim = c(-60, -40), ylim = c(40, 50), expand = TRUE) +
   theme_bw() +
   labs(x = "", y = "", fill = "Core Fishing\nGrounds")
 
-hab_change2014<-CFG_anomalies %>%
-  filter(x >= -60 & x <= -40 & y >=40) %>% 
-  filter(date == "May 2014" & Change != "NA") %>%
+hab_change2014<-CFG_anomalies %>% 
+  filter(date == "Apr 2014" & Change != "NA") %>%
   dplyr::select(x,y,Change) %>% 
   ggplot() +
   geom_tile(aes(x=x,y=y, fill = Change))+
+  geom_sf(data = NWA_PLL_zones, color = "black", fill = NA, size = 1)+
   geom_sf(data = world, color= "black", fill = "grey")+
-  geom_sf(data = NWA_PLL_zones %>% filter(ET_ID == "NED"), color = "black", fill = NA, size = 1)+
-  geom_label(aes(x = -56, y = 48.5,label = "May 2014")) +
+  geom_label(aes(x = -56, y = 48.5,label = "April 2014")) +
   scale_fill_manual(values = c("yellow", "red", "black"))+
   coord_sf(xlim = c(-60, -40), ylim = c(40, 50), expand = TRUE) +
   theme_bw() +
@@ -231,46 +231,52 @@ NED_MHW <- here("data","water_temp","NWA","oisst",
                 "MAB_NEC_NED_MHW.rds") %>% readRDS() %>% 
   filter(ET_ID == "NED")
 
+NED_MHW<-NED_MHW %>%
+  filter(lon >= -60 & lon <= -40 & lat >=40)
+
 NWA_mhw_2012<-NED_MHW %>%
-  filter(yearmon == "May 2012") %>% 
+  filter(yearmon == "Apr 2012") %>% 
   ggplot() +
   geom_tile(aes(x=lon,y=lat, fill = temp_anomaly))+
   geom_sf(data = world, color= "black", fill = "grey") +
   geom_sf(data = NWA_PLL_zones %>% filter(ET_ID == "NED") , color = "black", fill = NA, size = 1)+
   coord_sf(xlim = c(-60, -40), ylim = c(40, 50), expand = TRUE) +
   geom_contour(aes(x=lon,y=lat,z=MHW),color = "black") + 
-  geom_label(aes(x = -56, y = 48.5,label = "May 2012")) +
+  geom_label(aes(x = -56, y = 48.5,label = "April 2012")) +
   theme_bw()+
   labs(x = "",
        y = "")+
-  labs(fill = "SSTa (°C)", title = "Size: >54%, Intensity: 2°C")+
+  labs(fill = "SSTa (°C)", title = "Size: 50%, Intensity: 1.89°C")+
   scale_fill_cmocean(name="balance",
-                     limits = c(-2,2),oob = scales::squish,
-                     labels=c("\u2264 -2","-1","0","1","\u2265 2"))+
+                     limits = c(-5,5),oob = scales::squish,
+                     labels=c("\u2264 -5","-2.5","0","2.5","\u2265 5"))+
   #scale_color_manual(values = "black")+
   theme(legend.position="right")+
   theme(strip.background = element_blank())
 
 NWA_mhw_2014<-NED_MHW %>%
-  filter(yearmon == "May 2014") %>% 
+  filter(yearmon == "Apr 2014") %>% 
   ggplot() +
   geom_tile(aes(x=lon,y=lat, fill = temp_anomaly))+
   geom_sf(data = world, color= "black", fill = "grey") +
   geom_sf(data = NWA_PLL_zones %>% filter(ET_ID == "NED") , color = "black", fill = NA, size = 1)+
   coord_sf(xlim = c(-60, -40), ylim = c(40, 50), expand = TRUE) +
   geom_contour(aes(x=lon,y=lat,z=MHW),color = "black") +
-  geom_label(aes(x = -56, y = 48.5,label = "May 2014")) +
+  geom_label(aes(x = -56, y = 48.5,label = "April 2014")) +
   theme_bw()+
   labs(x = "", y = "")+
-  labs(fill = "SSTa (°C)", title = "Size: 2.5%, Intensity: >2°C")+
+  labs(fill = "SSTa (°C)", title = "Size: 8%, Intensity: 3.25°C")+
   scale_fill_cmocean(name="balance",
-                     limits = c(-2,2),oob = scales::squish,
-                     labels=c("\u2264 -2","-1","0","1","\u2265 2"))+
+                     limits = c(-5,5),oob = scales::squish,
+                     labels=c("\u2264 -5","-2.5","0","2.5","\u2265 5"))+
   #scale_color_manual(values = "black")+
   theme(legend.position="right")+
   theme(strip.background = element_blank())
 
-(NWA_mhw_2012 + hab_change2012) / (NWA_mhw_2014 + hab_change2014)
+cowplot::plot_grid(NWA_mhw_2012, hab_change2012,
+          NWA_mhw_2014, hab_change2014,
+          labels = c('(A)', '','(B)',''), label_size = 12)
+
 
 
 # a<-NWAPLL_MHW_total %>% 

@@ -363,9 +363,12 @@ MHWCOG_NWA_NEP<-rbind(MHWCOG_NWA %>%
                                       prop_MHW_area, prop_habitat_cells))
 
 #need to show this mechanistically
-cor_gradient<-cor.test(MHWCOG_NWA_NEP$dis_per_area, MHWCOG_NWA_NEP$sst_gradient)
-cor_size<-cor.test(MHWCOG_NWA_NEP$dis_per_area, MHWCOG_NWA_NEP$prop_MHW_cells)
-cor_hab<-cor.test(MHWCOG_NWA_NEP$dis_per_area, MHWCOG_NWA_NEP$prop_habitat_cells)
+cor_gradient<-cor.test(MHWCOG_NWA_NEP$dis_per_area, MHWCOG_NWA_NEP$sst_gradient_mean,
+                       method = 'spearman')
+cor_size<-cor.test(MHWCOG_NWA_NEP$dis_per_area, MHWCOG_NWA_NEP$prop_MHW_cells,
+                   method = 'spearman')
+cor_hab<-cor.test(MHWCOG_NWA_NEP$dis_per_area, MHWCOG_NWA_NEP$prop_habitat_cells,
+                  method = 'spearman')
 
 
 sst_sd_plot<-MHWCOG_NWA_NEP %>%
@@ -381,11 +384,11 @@ sst_sd_plot<-MHWCOG_NWA_NEP %>%
                  fill = mgmt_zone),shape = 21, size = 3)+
   stat_ellipse(aes(x=prop_habitat_cells,y=dis_per_area*1000000,
                    color=MHW),size = 1.5)+
-  theme_bw()+theme(legend.position = "none")+
-  geom_text(aes(x=2,y=500,
-                label = paste0("r = ",round(cor_gradient$estimate,3))))+
-  geom_text(aes(x=2,y=450,
-                label = paste0("p = ",round(cor_gradient$p.value,3))))+
+  theme_bw()+theme()+
+  # geom_text(aes(x=2,y=500,
+  #               label = paste0("r = ",round(cor_gradient$estimate,3))))+
+  # geom_text(aes(x=2,y=450,
+  #               label = paste0("p = ",round(cor_gradient$p.value,3))))+
   labs(x="SST Gradient", y="Relative Distance x 10e5") +
   viridis::scale_fill_viridis(discrete = TRUE)
 
