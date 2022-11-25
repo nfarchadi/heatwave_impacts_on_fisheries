@@ -17,8 +17,8 @@ NEP_TROLL$Pres_abs %>% unique()
 NEP_TROLL$lunar <- lunar::lunar.illumination(NEP_TROLL$date)
 NEP_TROLL <-NEP_TROLL %>% dplyr::select(-geometry)
 
-#histogram to look at the data
-NEP_TROLL %>% dplyr::select(c(12:16,19:23)) %>% gather() %>% ggplot(aes(value))+geom_histogram(bins = 10)+facet_wrap(~key, scales = "free_x")
+# #histogram to look at the data
+# NEP_TROLL %>% dplyr::select(c(12:16,19:23)) %>% gather() %>% ggplot(aes(value))+geom_histogram(bins = 10)+facet_wrap(~key, scales = "free_x")
 
 
 ####----Exploring different learning rates & interaction depth----####
@@ -57,8 +57,7 @@ gbmFit <- train(as.factor(Pres_abs) ~ n2 + sst_sd + sst + ssh_sd +
                 ## to evaluate:
                 tuneGrid = gbmGrid,
                 metric = "ROC")
-beepr::beep()
-gbmFit
+
 ggplot(gbmFit)
 
 
