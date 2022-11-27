@@ -11,19 +11,18 @@ sf_use_s2(FALSE)# need to do this to remove spherical geometry
 
 source(here("scripts","1_MHW_properties","functions","seasonal_threshold.r"))
 
-#mangement zones shapefile
-NWA_PLL_zones<-here("data","shapefiles","Zones_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+#mangement areas shapefile
+NEP_TROLL_areas<-here("data","shapefiles","NEP_TROLL","areas_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 
-NWA_PLL_zones<-st_transform(NWA_PLL_zones)
 
 #####
 # NED
 #####
 
-NED_mgmtzone<-NWA_PLL_zones[NWA_PLL_zones$ET_ID=="NED",]
+NED_mgmtarea<-NEP_TROLL_areas[NEP_TROLL_areas$ET_ID=="NED",]
 
 
-NED_oisst<-here("data","water_temp","NWA","oisst",
+NED_oisst<-here("data","water_temp","NEP","oisst",
                 "NED_OISST.rds") %>% readRDS() 
 
 
@@ -66,19 +65,19 @@ NED_MHW<- NED_MHW %>%
          lat = sf::st_coordinates(.)[,2])
 
 
-#Keep points only within NED mgmt zone
-NED_MHW <- st_join(NED_MHW,NED_mgmtzone) %>% as_tibble() %>% na.omit()
+#Keep points only within NED mgmt area
+NED_MHW <- st_join(NED_MHW,NED_mgmtarea) %>% as_tibble() %>% na.omit()
 
-rm(NED_mgmtzone)
+rm(NED_mgmtarea)
 
 #####
 # NEC
 #####
 
-NEC_mgmtzone<-NWA_PLL_zones[NWA_PLL_zones$ET_ID=="NEC",]
+NEC_mgmtarea<-NEP_TROLL_areas[NEP_TROLL_areas$ET_ID=="NEC",]
 
 
-NEC_oisst<-here("data","water_temp","NWA","oisst",
+NEC_oisst<-here("data","water_temp","NEP","oisst",
                 "NEC_OISST.rds") %>% 
   readRDS() 
 
@@ -121,20 +120,20 @@ NEC_MHW<- NEC_MHW %>%
          lat = sf::st_coordinates(.)[,2])
 
 
-# find points within NEC mgmt zone
-NEC_MHW <- st_join(NEC_MHW,NEC_mgmtzone) %>% as_tibble() %>% na.omit()
+# find points within NEC mgmt area
+NEC_MHW <- st_join(NEC_MHW,NEC_mgmtarea) %>% as_tibble() %>% na.omit()
 
-rm(NEC_mgmtzone)
+rm(NEC_mgmtarea)
 
 
 #####
 # MAB
 #####
 
-MAB_mgmtzone<-NWA_PLL_zones[NWA_PLL_zones$ET_ID=="MAB",]
+MAB_mgmtarea<-NEP_TROLL_areas[NEP_TROLL_areas$ET_ID=="MAB",]
 
 
-MAB_oisst<-here("data","water_temp","NWA","oisst",
+MAB_oisst<-here("data","water_temp","NEP","oisst",
                          "MAB_OISST.rds") %>% readRDS() 
 
 #monthly means
@@ -176,10 +175,10 @@ MAB_MHW<-MAB_MHW %>%
          lat = sf::st_coordinates(.)[,2])
 
 
-# find points within MAB mgmt zone
-MAB_MHW <- st_join(MAB_MHW, MAB_mgmtzone) %>% as_tibble() %>% na.omit()
+# find points within MAB mgmt area
+MAB_MHW <- st_join(MAB_MHW, MAB_mgmtarea) %>% as_tibble() %>% na.omit()
 
-rm(MAB_mgmtzone)
+rm(MAB_mgmtarea)
 
 
 ###################################
@@ -191,7 +190,7 @@ rm(MAB_mgmtzone)
 MAB_NEC_NED_MHW<-rbind(MAB_MHW,NEC_MHW,NED_MHW)
 
 saveRDS(MAB_NEC_NED_MHW, 
-        here("data","oisst","NWA_PLL","MAB_NEC_NED_MHW.rds"))
+        here("data","oisst","NEP_TROLL","MAB_NEC_NED_MHW.rds"))
 
 rm(MAB_MHW,NEC_MHW,NED_MHW,MAB_NEC_NED_MHW)
 
@@ -202,10 +201,10 @@ rm(MAB_MHW,NEC_MHW,NED_MHW,MAB_NEC_NED_MHW)
 # GOM
 #####
 
-GOM_mgmtzone<-NWA_PLL_zones[NWA_PLL_zones$ET_ID=="GOM",]
+GOM_mgmtarea<-NEP_TROLL_areas[NEP_TROLL_areas$ET_ID=="GOM",]
 
 
-GOM_oisst<-here("data","water_temp","NWA","oisst",
+GOM_oisst<-here("data","water_temp","NEP","oisst",
                 "GOM_OISST.rds") %>% readRDS() 
 
 
@@ -248,19 +247,19 @@ GOM_MHW<- GOM_MHW %>%
          lat = sf::st_coordinates(.)[,2])
 
 
-#Keep points only within GOM mgmt zone
-GOM_MHW <- st_join(GOM_MHW,GOM_mgmtzone) %>% as_tibble() %>% na.omit()
+#Keep points only within GOM mgmt area
+GOM_MHW <- st_join(GOM_MHW,GOM_mgmtarea) %>% as_tibble() %>% na.omit()
 
-rm(GOM_mgmtzone)
+rm(GOM_mgmtarea)
 
 #####
 # CAR
 #####
 
-CAR_mgmtzone<-NWA_PLL_zones[NWA_PLL_zones$ET_ID=="CAR",]
+CAR_mgmtarea<-NEP_TROLL_areas[NEP_TROLL_areas$ET_ID=="CAR",]
 
 
-CAR_oisst<-here("data","water_temp","NWA","oisst",
+CAR_oisst<-here("data","water_temp","NEP","oisst",
                 "CAR_OISST.rds") %>% readRDS() 
 
 
@@ -303,19 +302,19 @@ CAR_MHW<- CAR_MHW %>%
          lat = sf::st_coordinates(.)[,2])
 
 
-#Keep points only within CAR mgmt zone
-CAR_MHW <- st_join(CAR_MHW,CAR_mgmtzone) %>% as_tibble() %>% na.omit()
+#Keep points only within CAR mgmt area
+CAR_MHW <- st_join(CAR_MHW,CAR_mgmtarea) %>% as_tibble() %>% na.omit()
 
-rm(CAR_mgmtzone)
+rm(CAR_mgmtarea)
 
 #####
 # FEC
 #####
 
-FEC_mgmtzone<-NWA_PLL_zones[NWA_PLL_zones$ET_ID=="FEC",]
+FEC_mgmtarea<-NEP_TROLL_areas[NEP_TROLL_areas$ET_ID=="FEC",]
 
 
-FEC_oisst<-here("data","water_temp","NWA","oisst",
+FEC_oisst<-here("data","water_temp","NEP","oisst",
                 "FEC_OISST.rds") %>% readRDS() 
 
 
@@ -358,20 +357,20 @@ FEC_MHW<- FEC_MHW %>%
          lat = sf::st_coordinates(.)[,2])
 
 
-#Keep points only within FEC mgmt zone
-FEC_MHW <- st_join(FEC_MHW,FEC_mgmtzone) %>% as_tibble() %>% na.omit()
+#Keep points only within FEC mgmt area
+FEC_MHW <- st_join(FEC_MHW,FEC_mgmtarea) %>% as_tibble() %>% na.omit()
 
-rm(FEC_mgmtzone)
+rm(FEC_mgmtarea)
 
 
 #####
 # SAR
 #####
 
-SAR_mgmtzone<-NWA_PLL_zones[NWA_PLL_zones$ET_ID=="SAR",]
+SAR_mgmtarea<-NEP_TROLL_areas[NEP_TROLL_areas$ET_ID=="SAR",]
 
 
-SAR_oisst<-here("data","water_temp","NWA","oisst",
+SAR_oisst<-here("data","water_temp","NEP","oisst",
                 "SAR_OISST.rds") %>% readRDS() 
 
 
@@ -413,20 +412,20 @@ SAR_MHW<- SAR_MHW %>%
          lat = sf::st_coordinates(.)[,2])
 
 
-#Keep points only within SAR mgmt zone
-SAR_MHW <- st_join(SAR_MHW,SAR_mgmtzone) %>% as_tibble() %>% na.omit()
+#Keep points only within SAR mgmt area
+SAR_MHW <- st_join(SAR_MHW,SAR_mgmtarea) %>% as_tibble() %>% na.omit()
 
-rm(SAR_mgmtzone)
+rm(SAR_mgmtarea)
 
 
 #####
 # SAB
 #####
 
-SAB_mgmtzone<-NWA_PLL_zones[NWA_PLL_zones$ET_ID=="SAB",]
+SAB_mgmtarea<-NEP_TROLL_areas[NEP_TROLL_areas$ET_ID=="SAB",]
 
 
-SAB_oisst<-here("data","water_temp","NWA","oisst",
+SAB_oisst<-here("data","water_temp","NEP","oisst",
                 "SAB_OISST.rds") %>% readRDS() 
 
 
@@ -468,10 +467,10 @@ SAB_MHW<- SAB_MHW %>%
          lat = sf::st_coordinates(.)[,2])
 
 
-#Keep points only within SAB mgmt zone
-SAB_MHW <- st_join(SAB_MHW,SAB_mgmtzone) %>% as_tibble() %>% na.omit()
+#Keep points only within SAB mgmt area
+SAB_MHW <- st_join(SAB_MHW,SAB_mgmtarea) %>% as_tibble() %>% na.omit()
 
-rm(SAB_mgmtzone)
+rm(SAB_mgmtarea)
 
 ###################################
 # Combine southern management areas
@@ -480,5 +479,5 @@ rm(SAB_mgmtzone)
 GOM_CAR_FEC_SAR_SAB_MHW<-rbind(GOM_MHW,CAR_MHW,FEC_MHW,SAR_MHW,SAB_MHW)
 
 saveRDS(GOM_CAR_FEC_SAR_SAB_MHW,
-        here("data","oisst","NWA_PLL",
+        here("data","oisst","NEP_TROLL",
              "GOM_CAR_FEC_SAR_SAB_MHW.rds"))

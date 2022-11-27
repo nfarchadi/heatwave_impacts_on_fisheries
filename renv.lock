@@ -231,13 +231,6 @@
         "sp"
       ]
     },
-    "SDMTools": {
-      "Package": "SDMTools",
-      "Version": "1.1-13",
-      "Source": "unknown",
-      "Hash": "4e294b8fc14de6170dea13e374e4a61e",
-      "Requirements": []
-    },
     "SQUAREM": {
       "Package": "SQUAREM",
       "Version": "2021.1",
@@ -2043,6 +2036,20 @@
       "Hash": "7c902f18c0be04c8767b94019ffe8063",
       "Requirements": []
     },
+    "ncmeta": {
+      "Package": "ncmeta",
+      "Version": "0.3.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "3b2dc22fb02ac133c20b3baf2b7a3eef",
+      "Requirements": [
+        "RNetCDF",
+        "dplyr",
+        "rlang",
+        "tibble",
+        "tidyr"
+      ]
+    },
     "nlme": {
       "Package": "nlme",
       "Version": "3.1-160",
@@ -2951,10 +2958,10 @@
     },
     "terra": {
       "Package": "terra",
-      "Version": "1.6-17",
+      "Version": "1.6-41",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "3e264754dde87261bc7ccdb30d29d3b4",
+      "Hash": "273302c394cb69074118e885a47a036f",
       "Requirements": [
         "Rcpp"
       ]
@@ -3000,6 +3007,25 @@
         "pkgconfig",
         "rlang",
         "vctrs"
+      ]
+    },
+    "tidync": {
+      "Package": "tidync",
+      "Version": "0.3.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "5a485b7fa843995687123ce02cbc0eed",
+      "Requirements": [
+        "RNetCDF",
+        "dplyr",
+        "forcats",
+        "magrittr",
+        "ncdf4",
+        "ncmeta",
+        "purrr",
+        "rlang",
+        "tibble",
+        "tidyr"
       ]
     },
     "tidyr": {
