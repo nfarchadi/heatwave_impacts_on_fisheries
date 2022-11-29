@@ -15,9 +15,9 @@ sf_use_s2(FALSE)# need to do this to remove spherical geometry
 # mangement areas shapefile
 NEP_TROLL_areas<-here("data","shapefiles","NEP_TROLL","areas_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 
-#####
+####
 # VN
-#####
+####
 
 VN<-NEP_TROLL_areas %>% filter(ET_ID == "VN") %>% st_bbox()
 VNcrop_x <- st_bbox(VN)[c(1,3)]
@@ -71,9 +71,9 @@ saveRDS(VN_OISST_data, here("data","oisst","NEP_TROLL","VN_OISST.rds"))
 
 rm(VN_OISST_data, VN, VNcrop_x, VNcrop_y)
 
-#####
+####
 # CL
-#####
+####
 
 CL<-NEP_TROLL_areas %>% filter(ET_ID == "CL") %>% st_bbox()
 CLcrop_x <- st_bbox(CL)[c(1,3)]
@@ -105,9 +105,9 @@ saveRDS(CL_OISST_data, here("data","oisst","NEP_TROLL","CL_OISST.rds"))
 
 rm(CL_OISST_data, CL, CLcrop_x, CLcrop_y)
 
-#####
+####
 # EK
-#####
+####
 
 EK<-NEP_TROLL_areas %>% filter(ET_ID == "EK") %>% st_bbox()
 EKcrop_x <- st_bbox(EK)[c(1,3)]
@@ -139,9 +139,9 @@ saveRDS(EK_OISST_data, here("data","oisst","NEP_TROLL","EK_OISST.rds"))
 
 rm(EK_OISST_data, EK, EKcrop_x, EKcrop_y)
 
-#####
+####
 # MT
-#####
+####
 
 MT<-NEP_TROLL_areas %>% filter(ET_ID == "MT") %>% st_bbox()
 MTcrop_x <- st_bbox(MT)[c(1,3)]
@@ -173,9 +173,9 @@ saveRDS(MT_OISST_data, here("data","oisst","NEP_TROLL","MT_OISST.rds"))
 
 rm(MT_OISST_data, MT, MTcrop_x, MTcrop_y)
 
-#####
+####
 # CP
-#####
+####
 
 CP<-NEP_TROLL_areas %>% filter(ET_ID == "CP") %>% st_bbox()
 CPcrop_x <- st_bbox(CP)[c(1,3)]

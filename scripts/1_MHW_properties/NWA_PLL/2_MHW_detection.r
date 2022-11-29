@@ -22,7 +22,7 @@ NWA_PLL_areas<-here("data","shapefiles","NWA_PLL","areas_PLL.shp") %>% sf::st_re
 NED_mgmtarea<-NWA_PLL_areas[NWA_PLL_areas$ET_ID=="NED",]
 
 
-NED_oisst<-here("data","water_temp","NWA","oisst",
+NED_oisst<-here("data","oisst","NWA_PLL",
                 "NED_OISST.rds") %>% readRDS() 
 
 
@@ -77,7 +77,7 @@ rm(NED_mgmtarea)
 NEC_mgmtarea<-NWA_PLL_areas[NWA_PLL_areas$ET_ID=="NEC",]
 
 
-NEC_oisst<-here("data","water_temp","NWA","oisst",
+NEC_oisst<-here("data","oisst","NWA_PLL",
                 "NEC_OISST.rds") %>% 
   readRDS() 
 
@@ -133,7 +133,7 @@ rm(NEC_mgmtarea)
 MAB_mgmtarea<-NWA_PLL_areas[NWA_PLL_areas$ET_ID=="MAB",]
 
 
-MAB_oisst<-here("data","water_temp","NWA","oisst",
+MAB_oisst<-here("data","oisst","NWA_PLL",
                          "MAB_OISST.rds") %>% readRDS() 
 
 #monthly means
@@ -204,7 +204,7 @@ rm(MAB_MHW,NEC_MHW,NED_MHW,MAB_NEC_NED_MHW)
 GOM_mgmtarea<-NWA_PLL_areas[NWA_PLL_areas$ET_ID=="GOM",]
 
 
-GOM_oisst<-here("data","water_temp","NWA","oisst",
+GOM_oisst<-here("data","oisst","NWA_PLL",
                 "GOM_OISST.rds") %>% readRDS() 
 
 
@@ -259,7 +259,7 @@ rm(GOM_mgmtarea)
 CAR_mgmtarea<-NWA_PLL_areas[NWA_PLL_areas$ET_ID=="CAR",]
 
 
-CAR_oisst<-here("data","water_temp","NWA","oisst",
+CAR_oisst<-here("data","oisst","NWA_PLL",
                 "CAR_OISST.rds") %>% readRDS() 
 
 
@@ -314,7 +314,7 @@ rm(CAR_mgmtarea)
 FEC_mgmtarea<-NWA_PLL_areas[NWA_PLL_areas$ET_ID=="FEC",]
 
 
-FEC_oisst<-here("data","water_temp","NWA","oisst",
+FEC_oisst<-here("data","oisst","NWA_PLL",
                 "FEC_OISST.rds") %>% readRDS() 
 
 
@@ -370,7 +370,7 @@ rm(FEC_mgmtarea)
 SAR_mgmtarea<-NWA_PLL_areas[NWA_PLL_areas$ET_ID=="SAR",]
 
 
-SAR_oisst<-here("data","water_temp","NWA","oisst",
+SAR_oisst<-here("data","oisst","NWA_PLL",
                 "SAR_OISST.rds") %>% readRDS() 
 
 
@@ -425,7 +425,7 @@ rm(SAR_mgmtarea)
 SAB_mgmtarea<-NWA_PLL_areas[NWA_PLL_areas$ET_ID=="SAB",]
 
 
-SAB_oisst<-here("data","water_temp","NWA","oisst",
+SAB_oisst<-here("data","oisst","NWA_PLL",
                 "SAB_OISST.rds") %>% readRDS() 
 
 
