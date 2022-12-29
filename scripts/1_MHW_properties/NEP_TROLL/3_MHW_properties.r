@@ -6,7 +6,6 @@ library(heatwaveR)
 library(sf)
 library(raster)
 library(SDMTools)
-
 sf_use_s2(FALSE)# need to do this to remove spherical geometry
 
 
@@ -22,11 +21,11 @@ CP_MT_EK_CL_VN_MHW<-here("data","oisst", "NEP_TROLL",
 
 CP_MT_EK_CL_VN_MHW$yearmon<-zoo::as.yearmon(CP_MT_EK_CL_VN_MHW$yearmon)
 
-# lets run this for just MAB NEC NED mgmt areas
-NEP_MHW_monthly_metrics_MAB_NEC_NED<-MHW_metrics(CP_MT_EK_CL_VN_MHW)
+# lets run this for all mgmt areas
+NEP_MHW_monthly_metrics<-MHW_metrics(CP_MT_EK_CL_VN_MHW)
 
 
-NEP_MHW_monthly_metrics_MAB_NEC_NED<-bind_rows(NEP_MHW_monthly_metrics_MAB_NEC_NED) %>% 
+NEP_MHW_monthly_metrics<-bind_rows(NEP_MHW_monthly_metrics) %>% 
   dplyr::select(1,2,3,39:47) %>% rename("n.cell_MHW"="V44",
                                         "n.cell_noMHW"="V45",
                                         "n.cell_totalMHW"="V46",
@@ -38,9 +37,9 @@ NEP_MHW_monthly_metrics_MAB_NEC_NED<-bind_rows(NEP_MHW_monthly_metrics_MAB_NEC_N
 
 rm(CP_MT_EK_CL_VN_MHW) 
 
-NEP_MHW_monthly_metrics_TROLL<-NEP_MHW_monthly_metrics_MAB_NEC_NED %>%
+NEP_MHW_monthly_metrics_TROLL<-NEP_MHW_monthly_metrics %>%
   mutate(month = lubridate::month(date))
 
-saveRDS(NEP_MHW_monthly_metrics_TROLL, here("data","mgmt_area_metrics","NEP_TROLL","NEP_MHW_monthly_metrics_TROLL.rds"))
+saveRDS(NEP_MHW_monthly_metrics_TROLL, here("data","mgmt_area_metrics","NEP_TROLL","NEP_MHW_monthly_metrics.rds"))
 
-rm(NEP_MHW_monthly_metrics_MAB_NEC_NED,NEP_MHW_monthly_metrics_TROLL)
+rm(NEP_MHW_monthly_metrics,NEP_MHW_monthly_metrics_TROLL)

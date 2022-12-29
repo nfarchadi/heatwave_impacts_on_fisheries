@@ -17,7 +17,7 @@ sf_use_s2(FALSE)# need to do this to remove spherical geometry
 #############################################
 
 #mangement zones shapefile
-NWA_PLL_zones<-here("data","shapefiles","NWA_PLL","Zones_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+NWA_PLL_zones<-here("data","shapefiles","NWA_PLL","areas_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 #trying to clip the management zones to the coast
 land<-st_read("C:/Users/nfarc/Desktop/RCodes_Shapefiles/Shapefiles/gshhg-shp-2.3.7/GSHHS_shp/l/GSHHS_l_L1.shp",crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") 
 
@@ -40,10 +40,12 @@ NWA_PLL_zones_subset<-NWA_PLL_zones %>%
 #FYI need to get MHW_mgmtzone_all from 11_COG_HabitatChange_analysis.R
 MHW_mgmtzone_all_NWA<-MHW_mgmtzone_all
 MHW_mgmtzone_NWA_subset<-MHW_mgmtzone_all_NWA %>% 
-  filter(mgmt_zone %in% c("NED","MAB","FEC","CAR"))
+  filter(mgmt_zone %in% c("NED","MAB","FEC","CAR")) %>% 
+  mutate(mgmt_zone = factor(mgmt_zone, levels = c("NED","MAB","FEC","CAR")))
 
 may_2012_mhw_NWA_circle<-MHW_mgmtzone_all_NWA %>% 
   filter(mgmt_zone %in% c("NED","MAB","FEC","CAR")) %>% 
+  mutate(mgmt_zone = factor(mgmt_zone, levels = c("NED","MAB","FEC","CAR"))) %>% 
   filter(date == as.yearmon("2012-05-01"))
 
 ts_labels_NWA<-data.frame(mgmt_zone = factor(c("NED","MAB","FEC","CAR")),
@@ -77,7 +79,7 @@ NWA_mhw_signature<-ggplot() +
 ################################################
 time_vec <- seq.POSIXt(as.POSIXct('2012-01-01', tz='UTC'), as.POSIXct('2020-12-01', tz='UTC'), by='month')
 
-fList <- list.files("E:/OISST/SSTa", full.names = TRUE, pattern = ".nc")
+fList <- list.files("D:/OISST/SSTa", full.names = TRUE, pattern = ".nc")
 
 fList_years <- c()
 for (i in 1:length(fList)) fList_years[i] <- substr(fList[i], 26, 29)
@@ -97,7 +99,7 @@ colnames(mgmtzone_centroid_NWA)<-c("mgmt_zone","X","Y")
 
 NWA_mhw<-may_2012_mhw_NWA %>% 
   ggplot() +
-  geom_tile(aes(x=x,y=y, fill = SSTa))+
+  geom_raster(aes(x=x,y=y, fill = SSTa))+
   geom_sf(data = world, color= "black", fill = "grey") +
   geom_sf(data = NWA_PLL_zones_subset, color = "black", fill = NA, size = 1)+
   coord_sf(xlim = c(-97.5, -40), ylim = c(11.5, 48.5), expand = TRUE) +
@@ -139,7 +141,7 @@ NWA_mhw / NWA_mhw_signature
 #############################################
 
 #mangement zones shapefile
-NEP_TROLL_zones<-here("data","shapefiles","NEP_TROLL","Zones_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+NEP_TROLL_zones<-here("data","shapefiles","NEP_TROLL","areas_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 
 land<-st_read("C:/Users/nfarc/Desktop/RCodes_Shapefiles/Shapefiles/gshhg-shp-2.3.7/GSHHS_shp/l/GSHHS_l_L1.shp",crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") 
 
@@ -206,7 +208,7 @@ colnames(mgmtzone_centroid_NEP)<-c("mgmt_zone","X","Y")
 
 NEP_mhw<-may_2015_mhw_NEP %>% 
   ggplot() +
-  geom_tile(aes(x=lon,y=lat, fill = detrend))+
+  geom_raster(aes(x=lon,y=lat, fill = detrend))+
   geom_sf(data = world, color= "black", fill = "grey") +
   geom_sf(data = NEP_TROLL_zones_subset, color = "black", fill = NA, size = 1)+
   coord_sf(xlim = c(-134.5, -117), ylim = c(36.75, 53.75), expand = TRUE) +
@@ -237,12 +239,20 @@ NEP_mhw<-may_2015_mhw_NEP %>%
 (NEP_mhw | NWA_mhw)/ (NEP_mhw_signature | NWA_mhw_signature)  
 
 
+ggsave(here("Plots","both_coasts","F3_MHW_signatures&maps.png"),
+       width = 10, height = 7, units = "in", dpi = 300)
+ggsave(here("Plots","both_coasts","F3_MHW_signatures&maps.svg"),
+       width = 10, height = 7, units = "in", dpi = 300)
+
 ##########################################################################
 #all the NWA zones
 ##########################################################################
 
 #FYI need to get MHW_mgmtzone_all from 11_COG_HabitatChange_analysis.R
-MHW_mgmtzone_all_NWA<-MHW_mgmtzone_all
+MHW_mgmtzone_all_NWA<-MHW_mgmtzone_all %>% 
+  mutate(mgmt_zone = factor(mgmt_zone, level= c("NED","NEC","MAB",
+                              "SAB","SAR", "FEC",
+                              "GOM", "CAR")))
 
 
 ts_labels_NWA<-data.frame(mgmt_zone = factor(c("NED","NEC","MAB",
@@ -267,9 +277,12 @@ ggplot() +
                     strip.text.x = element_text(margin = margin(0,0,.05,0, "cm"))) +
   labs(x = "", y=expression("SSTa "(degree~C))) + 
   zoo::scale_x_yearmon(limits=c(zoo::as.yearmon("2012-01-01"),zoo::as.yearmon("2020-12-31")))+
-  scale_y_continuous(position = "right")+
-  geom_text(data=ts_labels_NWA, aes(label = label, x = -Inf, y = Inf),
-            hjust = 0, vjust = 1, fontface="bold")
+  scale_y_continuous(position = "right")
+
+ggsave(here("Plots","both_coasts","supp & other", "supp_MHWsignatures_NWA.png"),
+       width = 9, height = 7, units = "in", dpi = 300)
+ggsave(here("Plots","both_coasts","supp & other", "supp_MHWsignatures_NWA.svg"),
+       width = 9, height = 7, units = "in", dpi = 300)
 
 ##########################################################################
 #all the NEP zones now
@@ -357,23 +370,41 @@ MHW_total<-rbind(NWAPLL_MHW_total,NEPTROLL_MHW_total) %>%
 
 
 a<-MHW_total %>% 
-  ggplot(aes(x = mgmt_zone, y=mean_SSTa))+
-  geom_boxplot(color = "red")+
+  mutate(Fleet = case_when(mgmt_zone == "VN" ~ "Troll",
+                           mgmt_zone == "CL" ~ "Troll",
+                           mgmt_zone == "EK" ~ "Troll",
+                           mgmt_zone == "MT" ~ "Troll",
+                           TRUE ~ "Longline")) %>%
+  ggplot(aes(x = mgmt_zone, y=mean_SSTa, color = Fleet))+
+  geom_boxplot()+
+  scale_color_manual(values=c("orange","lightseagreen")) +
   stat_summary(fun=mean, geom="point", shape=8, size=1.5) +
   theme_bw() +
   labs(x = "Management Area",y = "MHW Intensity")
 
-b<-MHW_total %>%
-  ggplot(aes(x = mgmt_zone, y=prop_MHW_cells))+
-  geom_boxplot(color = "Orange")+
+b<-MHW_total %>% 
+  mutate(Fleet = case_when(mgmt_zone == "VN" ~ "Troll",
+                           mgmt_zone == "CL" ~ "Troll",
+                           mgmt_zone == "EK" ~ "Troll",
+                           mgmt_zone == "MT" ~ "Troll",
+                           TRUE ~ "Longline")) %>%
+  ggplot(aes(x = mgmt_zone, y=prop_MHW_cells, color = Fleet))+
+  geom_boxplot()+
+  scale_color_manual(values=c("orange","lightseagreen")) +
   stat_summary(fun=mean, geom="point", shape=8, size=1.5) +
   theme_bw() +
   labs(x = "Management Area",y = "MHW Size")
 
 c<-MHW_total %>% filter(MHW == 1) %>%
-  dplyr::select(mgmt_zone,event_index,sequence_months) %>%  
-  ggplot(aes(x = mgmt_zone, y=sequence_months))+
-  geom_boxplot(color = "gold")+
+  mutate(Fleet = case_when(mgmt_zone == "VN" ~ "Troll",
+                           mgmt_zone == "CL" ~ "Troll",
+                           mgmt_zone == "EK" ~ "Troll",
+                           mgmt_zone == "MT" ~ "Troll",
+                           TRUE ~ "Longline")) %>%
+  dplyr::select(mgmt_zone,event_index,sequence_months, Fleet) %>%  
+  ggplot(aes(x = mgmt_zone, y=sequence_months, color = Fleet))+
+  geom_boxplot()+
+  scale_color_manual(values=c("orange","lightseagreen")) +
   stat_summary(fun=mean, geom="point", shape=8, size=1.5) +
   theme_bw() +
   labs(x = "Management Area",y = "MHW Duration")
@@ -403,9 +434,13 @@ d<-MHW_total %>% filter(MHW == 1) %>%
   labs(x = "Management Area",y = expression("MHW "~"Frequency "~(y^-1)))
 
 
-cowplot::plot_grid(a,b,c,d, align = "hv",labels = c('(A)','(B)','(C)','(D)'), label_size = 10,nrow=2)
+supp_MHW_metrics<-cowplot::plot_grid(a,b,c, align = "v",labels = c('(A)','(B)','(C)'), label_size = 10,nrow=3)
 
 
+ggsave(here("Plots","both_coasts","supp & other","supp_MHW_metrics.png"),
+       width = 7, height = 6, units = "in", dpi = 300)
+ggsave(here("Plots","both_coasts","supp & other","supp_MHW_metrics.svg"),
+       width = 7, height = 6, units = "in", dpi = 300)
 
 ###looking at how intensity and size varied/differed between NWA mgmt areas
 #intensity
@@ -413,7 +448,7 @@ cowplot::plot_grid(a,b,c,d, align = "hv",labels = c('(A)','(B)','(C)','(D)'), la
 intensity_aov<-MHW_total %>%
   filter(mgmt_zone %in% c("NED","NEC","MAB",
                           "SAB","SAR","FEC",
-                          "GOM","CAR")) %>%
+                          "GOM","CAR")) %>% 
   filter(prop_MHW_cells > 0) %>% 
   dplyr::select(mgmt_zone,mean_SSTa) %>%  
   aov(mean_SSTa ~ mgmt_zone, data = .)

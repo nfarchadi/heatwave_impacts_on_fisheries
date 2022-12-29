@@ -1,4 +1,4 @@
-#Fitting VDM & validation for U.S. Atlantic Pelagic Longline Fleet
+#Fitting VDM & validation for U.S. Pacific Troll Fleet
 
 library(tidyverse)
 library(dismo)
@@ -9,31 +9,29 @@ library(here)
 # load in data
 ##############
 
-NWA_PLL<-here("data","AIS","NWA_PLL","Pres_Abs_2013to2020_NWA_USA_PLL_onlyfishing_1to1ratio_absenceconstrained_convexhull_enhanced.rds") %>% readRDS()
+NEP_TROLL<-here("data","AIS","NEP_TROLL","Pres_Abs_2012to2020_NEP_USA_TROLL_onlyfishing_1to1ratio_absenceconstrained_convexhull_enhanced.rds") %>% readRDS()
 
 # need to make sure responses (1 = presence & 0 = absence) are as integers for the BRT
-NWA_PLL$Pres_abs<-as.integer(as.character(NWA_PLL$Pres_abs))
+NEP_TROLL$Pres_abs<-as.integer(as.character(NEP_TROLL$Pres_abs))
 
 
 # adding lunar phases
-NWA_PLL$lunar <- lunar::lunar.illumination(NWA_PLL$date)
-NWA_PLL <-NWA_PLL %>% as.data.frame() %>% dplyr::select(-geometry)
+NEP_TROLL$lunar <- lunar::lunar.illumination(NEP_TROLL$date)
+NEP_TROLL <-NEP_TROLL %>% as.data.frame() %>% dplyr::select(-geometry)
 
 
 #########
 # fit BRT
 #########
-lr<-((0.0000017 * nrow(NWA_PLL)) - 0.000191) * (4:8)
-lr<-lr[3]
 
 set.seed(124) # for reproducibility 
 start_time<-Sys.time()
-brt <- dismo::gbm.step(data=NWA_PLL, 
+brt <- dismo::gbm.step(data=NEP_TROLL, 
                         gbm.x= c(9:13,16:20),  
                         gbm.y= 7, ### response variable
                         family = "bernoulli",
-                        tree.complexity = 3, ### complexity of the interactions that the model will fit
-                        learning.rate = lr,  ### optimized to end up with >1000 trees
+                        tree.complexity = 7, ### complexity of the interactions that the model will fit
+                        learning.rate = 0.03,  ### optimized to end up with >1000 trees
                         bag.fraction = 0.6### recommended by Elith, amount of input data used each time
                         )
 
@@ -50,7 +48,7 @@ dismo::gbm.plot(brt, n.plots = 12, write.title= FALSE, rug = T, smooth = TRUE, p
 
 
 # save the model
-saveRDS(brt, here("data","VDM_and_val","NWA_PLL","brt_VDM_gbm_step.rds"))
+saveRDS(brt, here("data","VDM_and_val","NEP_TROLL","brt_VDM_gbm_step.rds"))
 
 
 ############
@@ -61,7 +59,7 @@ saveRDS(brt, here("data","VDM_and_val","NWA_PLL","brt_VDM_gbm_step.rds"))
 source(here("scripts","2_VDM","functions","eval_kfold_brt.r"))
 
 
-brt_VDM_k <- eval_kfold_brt(dataInput = NWA_PLL, 
+brt_VDM_k <- eval_kfold_brt(dataInput = NEP_TROLL, 
                             gbm.x = c(9:13,16:20), 
                             gbm.y=7, learning.rate = lr, 
                             bag.fraction = 0.6, tree.complexity = 3,
@@ -78,8 +76,8 @@ brt_VDM_k <- eval_kfold_brt(dataInput = NWA_PLL,
 ## Leave One Year Out cross-validation
 source(here("scripts","2_VDM","functions","eval_loo_brt.r"))
 
-brt_VDM_loo <- eval_loo_brt(pres = NWA_PLL[which(NWA_PLL$Pres_abs == 1),],
-                        abs = NWA_PLL[which(NWA_PLL$Pres_abs == 0),], 
+brt_VDM_loo <- eval_loo_brt(pres = NEP_TROLL[which(NEP_TROLL$Pres_abs == 1),],
+                        abs = NEP_TROLL[which(NEP_TROLL$Pres_abs == 0),], 
                         gbm.x = c(9:13,16:20), 
                         gbm.y=7, learning.rate = lr, 
                         bag.fraction = 0.6, tree.complexity = 3)
@@ -91,6 +89,6 @@ eval <- list(brt = brt, brt_k = brt_VDM_k, brt_loo = brt_VDM_loo)
 
 #now save it
 
-saveRDS(eval, here("data","VDM_and_eval","NWA_PLL","brt_VDM_eval_gbm_step.rds"))
+saveRDS(eval, here("data","VDM_and_val","NEP_TROLL","brt_VDM_eval_gbm_step.rds"))
 
 

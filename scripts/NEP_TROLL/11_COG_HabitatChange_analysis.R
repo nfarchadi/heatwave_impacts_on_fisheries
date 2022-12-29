@@ -14,7 +14,7 @@ sf_use_s2(FALSE)# need to do this to remove spherical geometry
 #############################################
 
 #mangement zones shapefile
-NEP_TROLL_zones<-here("data","shapefiles","NEP_TROLL","Zones_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+NEP_TROLL_zones<-here("data","shapefiles","NEP_TROLL","areas_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 
 NEP_TROLL_zones<-st_transform(NEP_TROLL_zones)
 

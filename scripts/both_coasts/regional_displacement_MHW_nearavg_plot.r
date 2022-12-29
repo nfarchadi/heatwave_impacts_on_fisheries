@@ -39,7 +39,7 @@ sf_use_s2(FALSE)# need to do this to remove spherical geometry
 #############################################
 
 #mangement zones shapefile
-NWA_PLL_zones<-here("data","shapefiles","NWA_PLL","Zones_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") 
+NWA_PLL_zones<-here("data","shapefiles","NWA_PLL","areas_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") 
 
 #trying to clip the management zones to the coast
 land<-st_read("C:/Users/nfarc/Desktop/RCodes_Shapefiles/Shapefiles/gshhg-shp-2.3.7/GSHHS_shp/l/GSHHS_l_L1.shp",crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") 
@@ -152,7 +152,7 @@ NWA_PLL_zones<-st_difference(NWA_PLL_zones, st_union(st_combine(land)))
 #############################################
 
 #mangement zones shapefile
-NEP_TROLL_zones<-here("data","shapefiles","NEP_TROLL","Zones_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+NEP_TROLL_zones<-here("data","shapefiles","NEP_TROLL","areas_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 
 
 #trying to clip the management zones to the coast
@@ -431,32 +431,33 @@ NWA_plot<-MHWCOG_NWA %>%
   labs(title = "", y = "Relative Distance x 10e5", 
        x = "", fill = "")+
   geom_label(ks_pvD_NWA %>% filter(mgmt_zone %in% c("NED","NEC","MAB")), 
-             mapping=aes(x=c(8.2,7.2,6.2), y=185, label = D))+
+             mapping=aes(x=c(8.2,7.2,6.2), y=200, label = D))+
   geom_label(ks_pvD_NWA %>% filter(mgmt_zone %in% c("NED","NEC","MAB")), 
-             mapping=aes(x=c(8.2,7.2,6.2), y=160, label = pvalue))+
+             mapping=aes(x=c(8.2,7.2,6.2), y=150, label = pvalue))+
   geom_text(ks_pvD_NWA %>% filter(mgmt_zone %in% c("NED","NEC","MAB")), 
-            mapping=aes(x=c(8.2,7.2,6.2),y=176, label = "D:"))+
+            mapping=aes(x=c(8.2,7.2,6.2),y=178, label = "D:"))+
   geom_text(ks_pvD_NWA %>% filter(mgmt_zone %in% c("NED","NEC","MAB")), 
-            mapping=aes(x=c(8.2,7.2,6.2),y=147, label = "p-value:"))+
+            mapping=aes(x=c(8.2,7.2,6.2),y=116, label = "p-value:"))+
   #south
   geom_label(ks_pvD_NWA %>% filter(mgmt_zone %in% c("SAB","SAR","FEC",
                                                     "GOM","CAR")), 
-             mapping=aes(x=c(5.2,4.2,3.2,2.2,1.2), y=185, label = D),
+             mapping=aes(x=c(5.2,4.2,3.2,2.2,1.2), y=200, label = D),
              fontface = "bold")+
   geom_label(ks_pvD_NWA %>% filter(mgmt_zone %in% c("SAB","SAR","FEC",
                                                     "GOM","CAR")), 
-             mapping=aes(x=c(5.2,4.2,3.2,2.2,1.2), y=160, label = pvalue),
+             mapping=aes(x=c(5.2,4.2,3.2,2.2,1.2), y=150, label = pvalue),
              fontface = "bold")+
   geom_text(ks_pvD_NWA %>% filter(mgmt_zone %in% c("SAB","SAR","FEC",
                                                    "GOM","CAR")), 
-            mapping=aes(x=c(5.2,4.2,3.2,2.2,1.2),y=176, label = "D:"),
+            mapping=aes(x=c(5.2,4.2,3.2,2.2,1.2),y=178, label = "D:"),
             fontface = "bold")+
   geom_text(ks_pvD_NWA %>% filter(mgmt_zone %in% c("SAB","SAR","FEC",
                                                    "GOM","CAR")), 
-            mapping=aes(x=c(5.2,4.2,3.2,2.2,1.2),y=146, label = "p-value:"),
+            mapping=aes(x=c(5.2,4.2,3.2,2.2,1.2),y=116, label = "p-value:"),
             fontface = "bold")+
   coord_flip()
-    
+
+
 
 ######
 #TROLL
@@ -636,33 +637,35 @@ NEP_plot<-MHWCOG_NEP %>%
   labs(title = "", y = "Relative Distance x 10e5", 
        x = "")+
   #peripheral
-  geom_label(ks_pvD_NEP %>% filter(mgmt_zone %in% c("VN","MT")), 
-             mapping=aes(x=c(1.1,4.1), y=510, label = D),
-             fontface = "bold")+
-  geom_label(ks_pvD_NEP %>% filter(mgmt_zone %in% c("VN","MT")), 
-             mapping=aes(x=c(1.1,4.1), y=400, label = pvalue),
+  geom_text(ks_pvD_NEP %>% filter(mgmt_zone %in% c("VN","MT")), 
+             mapping=aes(x=c(1.2,4.2), y=440, label = "D:"),
              fontface = "bold")+
   geom_text(ks_pvD_NEP %>% filter(mgmt_zone %in% c("VN","MT")), 
-            mapping=aes(x=c(1.1,4.1),y=540, label = "D:"),
+             mapping=aes(x=c(1.2,4.2), y=255, label = "p-value:"),
+             fontface = "bold")+
+  geom_label(ks_pvD_NEP %>% filter(mgmt_zone %in% c("VN","MT")), 
+            mapping=aes(x=c(1.2,4.2),y=505, label = D),
             fontface = "bold")+
-  geom_text(ks_pvD_NEP %>% filter(mgmt_zone %in% c("VN","MT")), 
-            mapping=aes(x=c(1.1,4.1),y=447, label = "p-value:"),
+  geom_label(ks_pvD_NEP %>% filter(mgmt_zone %in% c("VN","MT")), 
+            mapping=aes(x=c(1.2,4.2),y=355, label = pvalue),
             fontface = "bold")+
   #central
-  geom_label(ks_pvD_NEP %>% filter(mgmt_zone %in% c("CL","EK")), 
-             mapping=aes(x=c(2.1,3.1), y=510, label = D))+
-  geom_label(ks_pvD_NEP %>% filter(mgmt_zone %in% c("CL","EK")), 
-             mapping=aes(x=c(2.1,3.1), y=400, label = pvalue))+
   geom_text(ks_pvD_NEP %>% filter(mgmt_zone %in% c("CL","EK")), 
-            mapping=aes(x=c(2.1,3.1),y=540, label = "D:"))+
+             mapping=aes(x=c(2.2,3.2), y=440, label = "D:"))+
   geom_text(ks_pvD_NEP %>% filter(mgmt_zone %in% c("CL","EK")), 
-            mapping=aes(x=c(2.1,3.1),y=445, label = "p-value:"))+
-  coord_flip()+scale_y_reverse()+scale_x_discrete(position = "top")
+             mapping=aes(x=c(2.2,3.2), y=260, label = "p-value:"))+
+  geom_label(ks_pvD_NEP %>% filter(mgmt_zone %in% c("CL","EK")), 
+            mapping=aes(x=c(2.2,3.2),y=505, label = D))+
+  geom_label(ks_pvD_NEP %>% filter(mgmt_zone %in% c("CL","EK")), 
+            mapping=aes(x=c(2.2,3.2),y=355, label = pvalue))+
+  coord_flip()#+scale_y_reverse()+scale_x_discrete(position = "top")
 
 
 
-
-
-cowplot::plot_grid(NEP_plot,NWA_plot,labels = c('A', 'B'), label_size = 12,
+F5_Relative_Displacement_distributions<-cowplot::plot_grid(NEP_plot,NWA_plot,labels = c('(A)', '(B)'), label_size = 12,
                    rel_widths = c(1,1.5))
 
+ggsave(here("Plots","both_coasts","F5_Relative_Displacement_distributions.png"),
+       width = 10, height = 7, units = "in", dpi = 300)
+ggsave(here("Plots","both_coasts","F5_Relative_Displacement_distributions.svg"),
+       width = 10, height = 7, units = "in", dpi = 300)

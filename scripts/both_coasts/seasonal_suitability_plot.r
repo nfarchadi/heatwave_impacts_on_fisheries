@@ -19,14 +19,14 @@ sf_use_s2(FALSE)# need to do this to remove spherical geometry
 #############################################
 
 #mangement zones shapefile
-NWA_PLL_zones<-here("data","shapefiles","NWA_PLL","Zones_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+NWA_PLL_zones<-here("data","shapefiles","NWA_PLL","areas_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 #trying to clip the management zones to the coast
 
 land<-st_read("C:/Users/nfarc/Desktop/RCodes_Shapefiles/Shapefiles/gshhg-shp-2.3.7/GSHHS_shp/l/GSHHS_l_L1.shp",crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") 
 
 NWA_PLL_zones<-st_difference(NWA_PLL_zones, st_union(st_combine(land)))
 
-NEP_TROLL_zones<-here("data","shapefiles","NEP_TROLL","Zones_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+NEP_TROLL_zones<-here("data","shapefiles","NEP_TROLL","areas_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 
 NEP_TROLL_zones<-st_difference(NEP_TROLL_zones, st_union(st_combine(land)))
 
@@ -58,19 +58,22 @@ NWA_PLL_seasonal<-rasterToPoints(NWA_PLL_seasonal) %>% as.data.frame() %>%
 
 NWA_PLL_plot<-NWA_PLL_seasonal %>% 
   ggplot()+
-  geom_tile(aes(x=x,y=y,fill=suitability))+
+  geom_raster(aes(x=x,y=y,fill=suitability))+
   geom_sf(data = world, color= "black", fill = "grey")+
   geom_sf(data = NWA_PLL_zones, color = "black", fill=NA)+ 
   facet_wrap(~season)+
   scale_fill_cmocean(name="haline",
                      limits = c(0,1),
                      labels=c("0","0.25","0.5","0.75","1"),
-                     guide = guide_colorbar(barwidth = 2, 
+                     guide = guide_colorbar(barwidth = 1, 
                                             barheight = 15))+
   coord_sf(xlim = c(-97.5, -40), ylim = c(11.5, 48.5), expand = TRUE) +
+  scale_y_continuous(breaks = c(10,20,30,40,50)) + 
+  scale_x_continuous(breaks = c(-100,-80,-60,-40)) +
   labs(x="",y="",fill = "Fishing\nGround\nSuitability")+
   theme_bw()+theme(strip.background = element_blank(),
-                   legend.spacing.y = unit(0.5, 'cm'))
+                   legend.spacing.y = unit(0.5, 'cm'))+
+  theme(axis.text.x = element_text(angle = 45,hjust=1))
 
 
 ###############################################################################
@@ -101,7 +104,7 @@ NEP_TROLL_seasonal<-rasterToPoints(NEP_TROLL_seasonal) %>% as.data.frame() %>%
 
 NEP_TROLL_plot<-NEP_TROLL_seasonal %>% 
   ggplot()+
-  geom_tile(aes(x=x,y=y,fill=suitability))+
+  geom_raster(aes(x=x,y=y,fill=suitability))+
   geom_sf(data = world, color= "black", fill = "grey")+
   geom_sf(data = NEP_TROLL_zones, color = "black", fill=NA, size = 1)+
   facet_wrap(~season)+
@@ -114,7 +117,17 @@ NEP_TROLL_plot<-NEP_TROLL_seasonal %>%
   labs(x="",y="",fill = "Fishing\nGround\nSuitability")+
   theme_bw()+theme(strip.background = element_blank(),
                    legend.spacing.y = unit(0.5, 'cm'),
-                   legend.position = "none")
+                   legend.position = "none")+
+  theme(axis.text.x = element_text(angle = 45,hjust=1))
 
-NEP_TROLL_plot | NWA_PLL_plot
+F2_seasonal_suitability_plots<-cowplot::plot_grid(NEP_TROLL_plot, NWA_PLL_plot, 
+                                                  labels = c('(A)','(B)'), 
+                                                  label_size = 10,nrow=1)
+
+
+
+ggsave(here("Plots","both_coasts","F2_seasonal_suitability_plots.png"),
+       width = 8, height = 3.5, units = "in", dpi = 300, scale = 1.5)
+ggsave(here("Plots","both_coasts","F2_seasonal_suitability_plots.svg"),
+       width = 8, height = 3.5, units = "in", dpi = 300, scale = 1.5)
 

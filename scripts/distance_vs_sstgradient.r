@@ -16,7 +16,7 @@ sf_use_s2(FALSE)# need to do this to remove spherical geometry
 #############################################
 
 #mangement zones shapefile
-NWA_PLL_zones<-here("data","shapefiles","NWA_PLL","Zones_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+NWA_PLL_zones<-here("data","shapefiles","NWA_PLL","areas_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 #trying to clip the management zones to the coast
 land<-st_read("C:/Users/nfarc/Desktop/RCodes_Shapefiles/Shapefiles/gshhg-shp-2.3.7/GSHHS_shp/l/GSHHS_l_L1.shp",crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") 
 
@@ -53,7 +53,7 @@ MHWCOG_NWA<-NWAPLL_MHW_total %>%
   st_as_sf(coords=c("COGx","COGy"),crs = "EPSG:4326")
 
 
-MHWCOG_NWA$distance <- map_dbl(1:nrow(MHWCOG_NWA), function(x){
+MHWCOG_NWA$distance <- purrr::map_dbl(1:nrow(MHWCOG_NWA), function(x){
   x <- MHWCOG_NWA[x,]
   y <- month_avgCOG[month_avgCOG$mgmt_zone == x$mgmt_zone & month_avgCOG$month == x$month,]
   st_distance(x, y)
@@ -174,7 +174,7 @@ MHWCOG_NWA %>% #filter(mgmt_zone %in% c("NED","MAB","FEC","CAR")) %>%
 #############################################
 
 #mangement zones shapefile
-NEP_TROLL_zones<-here("data","shapefiles","NEP_TROLL","Zones_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+NEP_TROLL_zones<-here("data","shapefiles","NEP_TROLL","areas_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 
 land<-st_read("C:/Users/nfarc/Desktop/RCodes_Shapefiles/Shapefiles/gshhg-shp-2.3.7/GSHHS_shp/l/GSHHS_l_L1.shp",crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") 
 
@@ -302,8 +302,8 @@ MHWCOG_NWA_NEP %>%
 #############################
 #distance vs distance to port
 #############################
-dis2port_NWA <- raster("E:/HYCOM/NWA_dis_port_masked_updatednobuffer.nc")
-dis2port_NEP <- raster("E:/HYCOM_NEP/NEP_ALB_dis_port_masked.nc")
+dis2port_NWA <- raster("D:/HYCOM/NWA_dis_port_masked_updatednobuffer.nc")
+dis2port_NEP <- raster("D:/HYCOM_NEP/NEP_ALB_dis_port_masked.nc")
 
 mgmt_zone_dis2port<-function(dis2port_nc,cog){
   
@@ -362,16 +362,15 @@ MHWCOG_NWA_NEP<-rbind(MHWCOG_NWA %>%
                                       prop_MHW_cells, mean_SSTa,lat,lon,
                                       prop_MHW_area, prop_habitat_cells))
 
-#need to show this mechanistically
-cor_gradient<-cor.test(MHWCOG_NWA_NEP$dis_per_area, MHWCOG_NWA_NEP$sst_gradient_mean,
-                       method = 'spearman')
-cor_size<-cor.test(MHWCOG_NWA_NEP$dis_per_area, MHWCOG_NWA_NEP$prop_MHW_cells,
-                   method = 'spearman')
-cor_hab<-cor.test(MHWCOG_NWA_NEP$dis_per_area, MHWCOG_NWA_NEP$prop_habitat_cells,
-                  method = 'spearman')
+cols <- c("NED" = "darkorange3", "NEC" = "darkorange2", 
+          "MAB" = "darkorange1", "SAB" = "lightgoldenrod3", 
+          "SAR" = "lightgoldenrod2","FEC" = "lightgoldenrod1",
+          "CAR" = "lightgoldenrod", "VN" = "seagreen4",
+          "CL" = "seagreen3", "EK" = "seagreen2",
+          "MT" = "seagreen1")
 
 
-sst_sd_plot<-MHWCOG_NWA_NEP %>%
+supp_displacement_sstgradient<-MHWCOG_NWA_NEP %>%
   mutate(MHW = if_else(MHW == 1, "MHW", "Non-MHW"),
          MHW = factor(MHW, levels = c("MHW","Non-MHW"))) %>%  
   mutate(mgmt_zone = factor(mgmt_zone, levels = c("NED","NEC","MAB",
@@ -385,12 +384,15 @@ sst_sd_plot<-MHWCOG_NWA_NEP %>%
   stat_ellipse(aes(x=prop_habitat_cells,y=dis_per_area*1000000,
                    color=MHW),size = 1.5)+
   theme_bw()+theme()+
-  # geom_text(aes(x=2,y=500,
-  #               label = paste0("r = ",round(cor_gradient$estimate,3))))+
-  # geom_text(aes(x=2,y=450,
-  #               label = paste0("p = ",round(cor_gradient$p.value,3))))+
-  labs(x="SST Gradient", y="Relative Distance x 10e5") +
-  viridis::scale_fill_viridis(discrete = TRUE)
+  labs(x="SST Gradient", y="Relative Distance x 10e5", fill = "Mangement Areas") +
+  #viridis::scale_fill_viridis(discrete = TRUE)
+  scale_fill_manual(values = cols)
+  
+
+ggsave(here("Plots","both_coasts","supp & other","supp_displacement_sstgradient.png"),
+       width = 7, height = 6, units = "in", dpi = 300)
+ggsave(here("Plots","both_coasts","supp & other","supp_displacement_sstgradient.svg"),
+       width = 7, height = 6, units = "in", dpi = 300)
 
 
 MHW_size_plot<-MHWCOG_NWA_NEP %>%

@@ -18,14 +18,14 @@ sf_use_s2(FALSE)# need to do this to remove spherical geometry
 #############################################
 
 #mangement zones shapefile
-NWA_PLL_zones<-here("data","shapefiles","NWA_PLL","Zones_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+NWA_PLL_zones<-here("data","shapefiles","NWA_PLL","areas_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 #trying to clip the management zones to the coast
 
 land<-st_read("C:/Users/nfarc/Desktop/RCodes_Shapefiles/Shapefiles/gshhg-shp-2.3.7/GSHHS_shp/l/GSHHS_l_L1.shp",crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") 
 
 NWA_PLL_zones<-st_difference(NWA_PLL_zones, st_union(st_combine(land)))
 
-NEP_TROLL_zones<-here("data","shapefiles","NEP_TROLL","Zones_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") %>% filter(ET_ID != "CP")
+NEP_TROLL_zones<-here("data","shapefiles","NEP_TROLL","areas_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") %>% filter(ET_ID != "CP")
 
 NEP_TROLL_zones<-st_difference(NEP_TROLL_zones, st_union(st_combine(land)))
 
@@ -70,43 +70,49 @@ ggplot() +
   scale_fill_viridis(option = "cividis", trans = "log",
                      name = "Total Fishing\nHours",
                      breaks = c(1,10,100,1000,4000),
-                     guide = guide_colorbar(barwidth = 2, 
-                                            barheight = 20)) +
+                     guide = guide_colorbar(barwidth = 1, 
+                                            barheight = 15)) +
   geom_sf(data = world, color= "black", fill = "grey")+
   geom_sf(data = all_zones, color = "black", fill=NA, size = 1)+
-  geom_label(data = mgmtzone_centroid[1,], aes(x = X-1, y = Y-2.5, #CAR
+  geom_label(data = mgmtzone_centroid[1,], aes(x = X-1.5, y = Y-3, #CAR
                                                  label = mgmt_zone),
                    fontface = "bold")+
   geom_label(data = mgmtzone_centroid[2:3,], aes(x = X, y = Y-1.5,#GOM & FEC
                                                  label = mgmt_zone),
                             fontface = "bold")+
-  geom_label(data = mgmtzone_centroid[4,], aes(x = X-5, y = Y,#MAB
+  geom_label(data = mgmtzone_centroid[4,], aes(x = X-6, y = Y,#MAB
                                                label = mgmt_zone),
                             fontface = "bold")+
-  geom_label(data = mgmtzone_centroid[5,], aes(x = X-3.5, y = Y+2.5,#NEC
+  geom_label(data = mgmtzone_centroid[5,], aes(x = X-2, y = Y+2.5,#NEC
                                                label = mgmt_zone),
                             fontface = "bold")+
-  geom_label(data = mgmtzone_centroid[6,], aes(x = X, y = Y+2.5,#NED
+  geom_label(data = mgmtzone_centroid[6,], aes(x = X-3, y = Y+2.5,#NED
                                                label = mgmt_zone),
              fontface = "bold")+
-  geom_label(data = mgmtzone_centroid[7,], aes(x = X-6, y = Y+1.5,#SAB
+  geom_label(data = mgmtzone_centroid[7,], aes(x = X-7.5, y = Y+1.5,#SAB
                                                label = mgmt_zone),
              fontface = "bold")+
-  geom_label(data = mgmtzone_centroid[8,], aes(x = X, y = Y+3,#SAR
+  geom_label(data = mgmtzone_centroid[8,], aes(x = X, y = Y+4.5,#SAR
                                                label = mgmt_zone),
              fontface = "bold")+
-  geom_label(data = mgmtzone_centroid[9,], aes(x = X+8.5, y = Y,#MT
+  geom_label(data = mgmtzone_centroid[9,], aes(x = X+9.5, y = Y,#MT
                                                label = mgmt_zone),
              fontface = "bold")+
-  geom_label(data = mgmtzone_centroid[10,], aes(x = X+7, y = Y,#EK
+  geom_label(data = mgmtzone_centroid[10,], aes(x = X+8, y = Y,#EK
                                                label = mgmt_zone),
              fontface = "bold")+
-  geom_label(data = mgmtzone_centroid[11,], aes(x = X+7, y = Y,#CL
+  geom_label(data = mgmtzone_centroid[11,], aes(x = X+8, y = Y,#CL
                                                label = mgmt_zone),
              fontface = "bold")+
-  geom_label(data = mgmtzone_centroid[12,], aes(x = X+6, y = Y,#VN
+  geom_label(data = mgmtzone_centroid[12,], aes(x = X+8, y = Y,#VN
                                                label = mgmt_zone),
              fontface = "bold")+
   coord_sf(xlim = c(-132, -44), ylim = c(10, 53.5), expand = TRUE)+
   labs(y = "Latitude", x = "Longitude")+theme_bw()
+
+
+ggsave(here("Plots","both_coasts","F1_PLL_TROLL_mgmtzones.png"),
+       width = 8, height = 5, units = "in", dpi = 300)
+ggsave(here("Plots","both_coasts","F1_PLL_TROLL_mgmtzones.svg"),
+       width = 7, height = 5, units = "in", dpi = 300)
 

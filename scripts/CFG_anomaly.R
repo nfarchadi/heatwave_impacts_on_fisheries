@@ -18,7 +18,7 @@ sf_use_s2(FALSE)# need to do this to remove spherical geometry
 #############################################
 
 #mangement zones shapefile
-NWA_PLL_zones<-here("data","shapefiles","NWA_PLL","Zones_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+NWA_PLL_zones<-here("data","shapefiles","NWA_PLL","areas_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 #trying to clip the management zones to the coast
 land<-st_read("C:/Users/nfarc/Desktop/RCodes_Shapefiles/Shapefiles/gshhg-shp-2.3.7/GSHHS_shp/l/GSHHS_l_L1.shp",crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") 
 
@@ -220,7 +220,7 @@ hab_change2012<-CFG_anomalies %>%
   scale_fill_manual(values = c("yellow", "red", "black"))+
   coord_sf(xlim = c(-60, -40), ylim = c(40, 50), expand = TRUE) +
   theme_bw() +
-  labs(x = "", y = "", fill = "Core Fishing\nGrounds")
+  labs(x = "", y = "", fill = "Core Fishing\nGrounds", title = "")
 
 hab_change2014<-CFG_anomalies %>% 
   filter(date == "May 2014" & Change != "NA") %>%
@@ -233,7 +233,7 @@ hab_change2014<-CFG_anomalies %>%
   scale_fill_manual(values = c("yellow", "red", "black"))+
   coord_sf(xlim = c(-60, -40), ylim = c(40, 50), expand = TRUE) +
   theme_bw() +
-  labs(x = "", y = "", fill = "Core Fishing\nGrounds")
+  labs(x = "", y = "", fill = "Core Fishing\nGrounds", title = "")
 
 
 
@@ -286,11 +286,15 @@ NWA_mhw_2014<-NED_MHW %>%
   theme(legend.position="right")+
   theme(strip.background = element_blank())
 
-cowplot::plot_grid(NWA_mhw_2012, hab_change2012,
+F6_habitatchangevsSSTa<-cowplot::plot_grid(NWA_mhw_2012, hab_change2012,
           NWA_mhw_2014, hab_change2014,
-          labels = c('(A)', '','(B)',''), label_size = 12)
+          labels = c('(A)','(B)','(C)','(D)'), label_size = 10,
+          rel_widths = c(1,1.05,1,1.05))
 
-
+ggsave(here("Plots","both_coasts","F6_habitatchangevsSSTa.png"),
+       width = 10, height = 7, units = "in", dpi = 300)
+ggsave(here("Plots","both_coasts","F6_habitatchangevsSSTa.svg"),
+       width = 10, height = 7, units = "in", dpi = 300)
 
 # a<-NWAPLL_MHW_total %>% 
 #   filter(mgmt_zone == "NED") %>% 

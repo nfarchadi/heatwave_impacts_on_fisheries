@@ -151,14 +151,14 @@ cowplot::plot_grid(Tp,Lp,labels = c('A', 'B'), label_size = 12)
 
 
 #management zones shapefile
-NWA_PLL_zones<-here("data","shapefiles","NWA_PLL","Zones_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+NWA_PLL_zones<-here("data","shapefiles","NWA_PLL","areas_PLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 
 land<-st_read("C:/Users/nfarc/Desktop/RCodes_Shapefiles/Shapefiles/gshhg-shp-2.3.7/GSHHS_shp/l/GSHHS_l_L1.shp",crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0") 
 
 NWA_PLL_zones<-st_difference(NWA_PLL_zones, st_union(st_combine(land)))
 
 
-NEP_TROLL_zones<-here("data","shapefiles","NEP_TROLL","Zones_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+NEP_TROLL_zones<-here("data","shapefiles","NEP_TROLL","areas_TROLL.shp") %>% sf::st_read(crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 
 NEP_TROLL_zones<-st_difference(NEP_TROLL_zones, st_union(st_combine(land)))
 
@@ -176,7 +176,7 @@ mgmt_zone_coef<-coefficients(MHW_glmm)$mgmt_zone
 
 mgmt_zone_coef<-mgmt_zone_coef %>%  
   tibble::rownames_to_column("mgmt_zone") %>% 
-  mutate(Fishery = case_when(mgmt_zone %in% c("NED","NEC", "MAB",
+  mutate(Fleet = case_when(mgmt_zone %in% c("NED","NEC", "MAB",
                                               "SAB","SAR","FEC",
                                               "GOM","CAR") ~ "Longline",
          mgmt_zone %in% c("VN","CL","EK","MT") ~ "Troll")) %>% 
@@ -184,16 +184,24 @@ mgmt_zone_coef<-mgmt_zone_coef %>%
          "Size"="prop_MHW_cells",
          "Duration"="sequence_months") %>%
   left_join(., mgmtzone_centroid, by = c("mgmt_zone")) %>%
-  gather("Parameters","Coefficients",-mgmt_zone,-X,-Y,-Fishery) %>% 
+  gather("Parameters","Coefficients",-mgmt_zone,-X,-Y,-Fleet) %>% 
   mutate(Parameters = factor(Parameters, levels = c("Intensity","Size",
                                                     "Duration","(Intercept)")))
   
 
 mgmt_zone_coef %>% filter(Parameters != "(Intercept)") %>% 
   ggplot() +
-  geom_path(aes(x = Coefficients, y = Y, color = Fishery),
+  geom_vline(xintercept = 0, linetype="dashed", 
+             color = "gray", size = 1)+
+  geom_path(aes(x = Coefficients, y = Y, color = Fleet),
             size = 1) +
   geom_label(aes(x = Coefficients, y = Y,label = mgmt_zone))+
   facet_wrap(~Parameters) + theme_bw() + 
-  labs(x = "% Change in Core Fishing Ground Area\nper 1 unit increase in MHW Property", y = "Latitude", color = "Fishery")+
-  scale_color_manual(values=c("orange","lightseagreen"))
+  labs(x = "% Change in Core Fishing Ground Area\nper 1 unit increase in MHW Property", y = "Latitude", color = "Fleet")+
+  scale_color_manual(values=c("orange","lightseagreen"))+
+  xlim(-10, 26)
+
+ggsave(here("Plots","both_coasts","F4_GLMMcoefficents.png"),
+       width = 10, height = 6, units = "in", dpi = 300)
+ggsave(here("Plots","both_coasts","F4_GLMMcoefficents.svg"),
+       width = 10, height = 6, units = "in", dpi = 300)
