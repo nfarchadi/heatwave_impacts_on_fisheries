@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 *.nc
+*.svg
 dashboard_and_other
 Plots/old
 scripts/old
