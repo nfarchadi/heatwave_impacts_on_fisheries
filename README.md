@@ -25,6 +25,6 @@ Majority of the analysis is performed separately for the U.S. Atlantic longline 
     - *Available data for users:*
         - MHW property and fleet response metrics in `mgmt_area_metrics` folder. This contains all the data needed to replicate fleet response analysis. 
         - `shapefiles` of each fishing fleets management areas.
-        - VDM and validation metrics for each fishing fleet in the `VDM_and_val` folder.
+        - Boosted Regresssion Trees models (i.e. vessel distribution models; VDM) and validation metrics for each fishing fleet in the `VDM_and_val` folder.
 
 - `Plots` contains .png files of all the figures in the manuscript. 
