@@ -28,3 +28,12 @@ Majority of the analysis is performed separately for the U.S. Atlantic longline 
         - Boosted Regresssion Trees models (i.e. vessel distribution models; VDM) and validation metrics for each fishing fleet in the `VDM_and_val` folder.
 
 - `Plots` contains .png files of all the figures in the manuscript. 
+
+
+# Related Products
+
+This research was part of the **Fisheries and Climate Toolkit (FaCeT)** which is a NASA-funded project that is developing an online paltform for fisheries stakeholders to vizualize and explore how climate change will impact highly migratory species and fisheries. FaCeT bridges the gap between fisheries and climate science to support climate resilient and sustainable fisheries. 
+
+To learn more about FaCeT and to interact with developed tools on the dashboard (such as the results from this study) explore the two links below: 
+- [FaCeT project website](https://fisheriesclimatetoolkit.sdsu.edu/)
+- [FaCeT dashboard website](https://facet.research.gmri.io/)
