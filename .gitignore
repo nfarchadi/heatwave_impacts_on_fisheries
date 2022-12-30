@@ -2,7 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-.Rprofile
 *.nc
 *.svg
 dashboard_and_other
