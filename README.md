@@ -19,11 +19,12 @@ Majority of the analysis is performed separately for the U.S. Atlantic longline 
 
 - `scripts` contains all code to download, wrangle, and analyze the data. Scripts are separated into subfolders that correspond to the analysis they were used for. Subfolders are numbered in the order the analysis should be performed. Also contains code to reproduce plots. 
 
--`functions` contains homemade functions called in `scripts`. Each `scripts` subfolder has its own designated `functions` folder.
+- `functions` contains homemade functions called in `scripts`. Each `scripts` subfolder has its own designated `functions` folder.
 
 - `data` is the directory where all of the data used in the analysis will live. This includes raw and processed AIS data, models and validations, model predictions, all environmental data, and summary metrics. Due to limited storage, large files (e.g. environmental data, AIS data, spatial predictions) are not version controlled and thus many of the diectroies for these data are not shown.
     - *Available data for users:*
         - MHW property and fleet response metrics in `mgmt_area_metrics` folder. This contains all the data needed to replicate fleet response analysis. 
         - `shapefiles` of each fishing fleets management areas.
+        - VDM and validation metrics for each fishing fleet in the `VDM_and_val` folder.
 
 - `Plots` contains .png files of all the figures in the manuscript. 
