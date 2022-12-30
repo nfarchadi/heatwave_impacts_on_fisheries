@@ -23,7 +23,7 @@ Majority of the analysis is performed separately for the U.S. Atlantic longline 
 
 - `data` is the directory where all of the data used in the analysis will live. This includes raw and processed AIS data, models and validations, model predictions, all environmental data, and summary metrics. Due to limited storage, large files (e.g. environmental data, AIS data, spatial predictions) are not version controlled and thus many of the diectroies for these data are not shown.
     - *Available data for users:*
-        - MHW property and fleet response metrics in `mgmt_area_metrics` folder. Data needed to replicate fleet response analysis.
+        - MHW property and fleet response metrics in `mgmt_area_metrics` folder. This contains all the data needed to replicate fleet response analysis. 
         - `shapefiles` of each fishing fleets management areas.
 
 - `Plots` contains .png files of all the figures in the manuscript. 
