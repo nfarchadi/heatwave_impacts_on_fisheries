@@ -3,6 +3,9 @@
 .RData
 .Ruserdata
 *.nc
+dashboard_and_other
+Plots/old
+scripts/old
 data/AIS 
 data/mgmt_area_metrics/NEP_TROLL/NEP_MHW_monthly_metrics.rds
 data/mgmt_area_metrics/NEP_TROLL/NEP_TROLL_CFGmetrics_monthly.rds
