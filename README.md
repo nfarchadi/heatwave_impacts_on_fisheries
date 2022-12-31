@@ -37,3 +37,7 @@ This research was part of the **Fisheries and Climate Toolkit (FaCeT)** which is
 To learn more about FaCeT and to interact with developed tools on the dashboard (such as the results from this study) explore the two links below: 
 - [FaCeT project website](https://fisheriesclimatetoolkit.sdsu.edu/)
 - [FaCeT dashboard website](https://facet.research.gmri.io/)
+
+# Questions and Feedback
+
+If you encounter with any problems or error, please create an issue here. Starting an issue will help other trying to use this code. With any other questions please contact the lead other, N. Farchadi, at nfarchadi@sdsu.edu
