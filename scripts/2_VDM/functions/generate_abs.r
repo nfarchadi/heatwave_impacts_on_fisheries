@@ -4,7 +4,7 @@ generate_abs<-function(input_df, udates,template, ratio = 3){
   subdate_presence<-filter(input_df, 
                            input_df$date==udates)
   
-  subdate_absences=rasterToPoints(template) %>% as.data.frame()  %>% rename("unique"="Altitude") %>% as.data.frame() %>%
+  subdate_absences=rasterToPoints(template) %>% as.data.frame()  %>% rename("unique"=3) %>% as.data.frame() %>%
     filter(!(unique %in%subdate_presence$unique)) %>% mutate(type=0) %>%  ## only select pixels that don't have presences
     .[sample(nrow(.),nrow(subdate_presence)*ratio),] %>% 
     mutate(date=udates,geartype="background",flag="No_flag",
