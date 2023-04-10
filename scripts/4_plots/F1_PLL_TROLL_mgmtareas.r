@@ -38,10 +38,10 @@ all_areas<-rbind(NWA_PLL_areas,NEP_TROLL_areas)
 #############################################
 #load in AIS data
 #############################################
-NEP_TROLL<-here("data","AIS_processed","NEP_TROLL","Pres_Abs_2013to2020_NWA_USA_TROLL_onlyfishing_v2_1to1ratio_absenceconstrained_convexhull_v2_enhanced.rds") %>% readRDS() %>% mutate(fleet = "TROLL") %>% 
+NEP_TROLL<-here("data","AIS","NEP_TROLL","Pres_Abs_2012to2020_NEP_USA_TROLL_onlyfishing_1to1ratio_absenceconstrained_convexhull_enhanced.rds") %>% readRDS() %>% mutate(fleet = "TROLL") %>% 
   dplyr::select(X,Y,Pres_abs,fleet, fishing_hours)
 
-NWA_PLL<-here("data","AIS_processed","NWA_PLL","Pres_Abs_2013to2020_NWA_USA_PLL_onlyfishing_v2_1to1ratio_absenceconstrained_convexhull_v2_enhanced.rds") %>% readRDS() %>% mutate(fleet = "PLL")%>% 
+NWA_PLL<-here("data","AIS","NWA_PLL","Pres_Abs_2013to2020_NWA_USA_PLL_onlyfishing_1to1ratio_absenceconstrained_convexhull_enhanced.rds") %>% readRDS() %>% mutate(fleet = "PLL")%>% 
   dplyr::select(X,Y,Pres_abs,fleet, fishing_hours)
 
 all_AIS<-rbind(NWA_PLL,NEP_TROLL)
@@ -51,9 +51,10 @@ res <- 0.5
 
 all_AIS<-all_AIS %>% filter(Pres_abs == 1) %>% 
   mutate(X = floor(X/res) * res + 0.5 * res,
-         Y = floor(Y/res) * res + 0.5 * res) %>% 
+         Y = floor(Y/res) * res + 0.5 * res,
+         fishing_effort = 1) %>% 
   group_by(X,Y) %>% 
-  summarise(fishing_hours = sum(fishing_hours, na.rm = T), .groups = "drop") 
+  summarise(fishing_effort = sum(fishing_effort, na.rm = T), .groups = "drop") 
 
 #############################################
 #plotting the AIS occurrences
@@ -68,10 +69,10 @@ colnames(mgmtarea_centroid)<-c("mgmt_area","X","Y")
 
 ggplot() +
   geom_tile(all_AIS ,
-             mapping = aes(x=X, y=Y, fill = fishing_hours)) +
+             mapping = aes(x=X, y=Y, fill = fishing_effort)) +
   scale_fill_viridis(option = "cividis", trans = "log",
-                     name = "Total Fishing\nHours",
-                     breaks = c(1,10,100,1000,4000),
+                     name = "Total Fishing\nEffort Occurrence",
+                     breaks = c(1,10,100,400),
                      guide = guide_colorbar(barwidth = 1, 
                                             barheight = 15)) +
   geom_sf(data = world, color= "black", fill = "grey")+
