@@ -47,7 +47,7 @@ for (i in 1:length(udates)) {
   ## sst
   sst <- list.files(path = here("data","hycom","NEP_TROLL"),
                         full.names=TRUE) %>% 
-    grep(pattern = paste0("u_",udates[i]),value = TRUE) %>% raster()
+    grep(pattern = paste0("temp_",udates[i]),value = TRUE) %>% raster()
   
   ## ssh_sd
   ssh_sd <- list.files(path = here("data","hycom","NEP_TROLL"),
@@ -77,7 +77,7 @@ for (i in 1:length(udates)) {
                     "ssh_sd", "ssh", "eke", "salinity", "bathy", "rugosity")
   
   #file name
-  fname<-paste0("hycom_combine_",udates[i],".nc")
+  fname<-paste0("hycom_combine_",udates[i],".grd")
   
   raster::writeRaster(combine, filename = here("data","hycom","NEP_TROLL", 
                                                "hycom_combine", fname), 
