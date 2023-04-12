@@ -12,6 +12,7 @@ library(here)
 library(sf)
 library(tidyverse)
 library(viridis)
+library(heatwaveR)
 
 world <- ne_countries(scale = "medium", returnclass = "sf")
 sf_use_s2(FALSE)# need to do this to remove spherical geometry
@@ -42,7 +43,8 @@ NWA_PLL_areas_subset<-NWA_PLL_areas %>%
 #Plotting MHW timeseries for each NWA mgmt area
 ###############################################
 
-#FYI need to get MHW_mgmtarea_all from 10_CFG_change_analysis.R
+MHW_mgmtarea_all<-here("data","mgmt_area_metrics","NWA_PLL",
+                        "NWAPLL_CFG_MHW_total.rds") %>% readRDS()
 
 MHW_mgmtarea_all_NWA<-MHW_mgmtarea_all
 MHW_mgmtarea_NWA_subset<-MHW_mgmtarea_all_NWA %>% 
@@ -55,11 +57,11 @@ may_2012_mhw_NWA_circle<-MHW_mgmtarea_all_NWA %>%
   filter(date == as.yearmon("2012-05-01"))
 
 ts_labels_NWA<-data.frame(mgmt_area = factor(c("NED","MAB","FEC","CAR")),
-                      label = c("(G)","(H)","(I)","(J)"))
+                      label = c("(D)","(F)","(H)","(J)"))
 
 NWA_mhw_signature<-ggplot() +
-  geom_flame(MHW_mgmtarea_NWA_subset, mapping = aes(x = date, y = detrend, y2 = seas)) +
-  geom_line(MHW_mgmtarea_NWA_subset, mapping = aes(x = date, y = detrend))+
+  geom_flame(MHW_mgmtarea_NWA_subset, mapping = aes(x = date, y = temp_anomaly, y2 = seas)) +
+  geom_line(MHW_mgmtarea_NWA_subset, mapping = aes(x = date, y = temp_anomaly))+
   geom_line(MHW_mgmtarea_NWA_subset, mapping = aes(x = date, y = seas),color = "forestgreen",linetype = "dashed", size = .5)+
   facet_wrap(~mgmt_area, nrow = 4)+
   geom_rect(may_2012_mhw_NWA_circle, mapping=aes(xmin = date, xmax=date + 0.1, ymin=-Inf,
@@ -77,7 +79,7 @@ NWA_mhw_signature<-ggplot() +
   zoo::scale_x_yearmon(limits=c(zoo::as.yearmon("2012-01-01"),zoo::as.yearmon("2020-12-31")))+
   scale_y_continuous(position = "right")+
   geom_text(data=ts_labels_NWA, aes(label = label, x = -Inf, y = Inf),
-            hjust = 0, vjust = 1, fontface="bold")
+            hjust = 0, vjust = 1, fontface="bold", size = 5)
   
 
 #################################################
@@ -89,7 +91,7 @@ NWA_mhw_signature<-ggplot() +
 
 time_vec <- seq.POSIXt(as.POSIXct('2012-01-01', tz='UTC'), as.POSIXct('2020-12-01', tz='UTC'), by='month')
 
-fList <- list.files("D:/OISST/SSTa", full.names = TRUE, pattern = ".nc")
+fList <- list.files("E:/OISST/SSTa", full.names = TRUE, pattern = ".nc")
 
 fList_years <- c()
 for (i in 1:length(fList)) fList_years[i] <- substr(fList[i], 26, 29)
@@ -135,8 +137,8 @@ NWA_mhw<-may_2012_mhw_NWA %>%
   geom_label(data = mgmtarea_centroid_NWA[4,], aes(x = X-4, y = Y+4,#NED
                                                label = mgmt_area),
              fontface = "bold")+
-  geom_text(data=data.frame(), aes(label = '(F)', x = -Inf, y = Inf),
-            hjust = 0, vjust = 1, fontface="bold")
+  geom_text(data=data.frame(), aes(label = '(B)', x = -Inf, y = Inf),
+            hjust = 0, vjust = 1, fontface="bold", size = 8)
 
 NWA_mhw / NWA_mhw_signature  
 
@@ -145,7 +147,8 @@ NWA_mhw / NWA_mhw_signature
 #all the NWA areas
 ###################
 
-#FYI need to get MHW_mgmtarea_all from 10_CFG_change_analysis.R
+MHW_mgmtarea_all<-here("data","mgmt_area_metrics","NWA_PLL",
+                        "NWAPLL_CFG_MHW_total.rds") %>% readRDS()
 
 MHW_mgmtarea_all_NWA<-MHW_mgmtarea_all %>% 
   mutate(mgmt_area = factor(mgmt_area, level= c("NED","NEC","MAB",
@@ -217,7 +220,8 @@ NEP_TROLL_areas_subset<-NEP_TROLL_areas %>%
 #Plotting MHW timeseries for each NEP mgmt area
 ################################################
 
-#FYI need to get MHW_mgmtarea_all from 10_CFG_change_analysis.R
+MHW_mgmtarea_all<-here("data","mgmt_area_metrics","NEP_TROLL",
+                             "NEPTROLL_CFG_MHW_total.rds") %>% readRDS()
 
 MHW_mgmtarea_all_NEP<-MHW_mgmtarea_all
 MHW_mgmtarea_NEP_subset<-MHW_mgmtarea_all_NEP %>% 
@@ -229,11 +233,11 @@ may_2015_mhw_NEP_circle<-MHW_mgmtarea_NEP_subset %>%
   filter(date == as.yearmon("2015-05-01"))
 
 ts_labels_NEP<-data.frame(mgmt_area = factor(c("VN","CL","EK","MT")),
-                      label = c("(B)","(C)","(D)","(E)"))
+                      label = c("(C)","(E)","(G)","(I)"))
 
 NEP_mhw_signature<-ggplot() +
-  geom_flame(MHW_mgmtarea_NEP_subset, mapping = aes(x = date, y = detrend, y2 = seas)) +
-  geom_line(MHW_mgmtarea_NEP_subset, mapping = aes(x = date, y = detrend))+
+  geom_flame(MHW_mgmtarea_NEP_subset, mapping = aes(x = date, y = temp_anomaly, y2 = seas)) +
+  geom_line(MHW_mgmtarea_NEP_subset, mapping = aes(x = date, y = temp_anomaly))+
   geom_line(MHW_mgmtarea_NEP_subset, mapping = aes(x = date, y = seas),color = "forestgreen",linetype = "dashed", size = .5)+
   facet_wrap(~mgmt_area, nrow = 4)+
   geom_rect(may_2015_mhw_NEP_circle, mapping=aes(xmin = date, xmax=date + 0.1, ymin=-Inf,
@@ -251,13 +255,13 @@ NEP_mhw_signature<-ggplot() +
   zoo::scale_x_yearmon(limits=c(zoo::as.yearmon("2012-01-01"),zoo::as.yearmon("2020-12-31")))+
   scale_y_continuous(position = "left")+
   geom_text(data=ts_labels_NEP, aes(label = label, x = -Inf, y = Inf),
-            hjust = 0, vjust = 1, fontface="bold")
+            hjust = 0, vjust = 1, fontface="bold", size = 5)
 
 ################################################
 #SSTa raster map of a certain MHW (MHW Intensity)
 ################################################
 
-may_2015_mhw_NEP<-here("data","water_temp","NEP","oisst","Conception_Monterey_Eureka_Columbia_Vancouver_MHW.rds") %>% readRDS() %>% 
+may_2015_mhw_NEP<-here("data","oisst","NEP_TROLL", "CP_MT_EK_CL_VN_MHW.rds") %>% readRDS() %>% 
   filter(yearmon == as.yearmon("2015-05-01"))
 
 
@@ -294,7 +298,7 @@ NEP_mhw<-may_2015_mhw_NEP %>%
                                                label = mgmt_area),
              fontface = "bold")+
   geom_text(data=data.frame(), aes(label = '(A)', x = -119, y = Inf),
-            hjust = 0, vjust = 1, fontface="bold")
+            hjust = 0.3, vjust = 1, fontface="bold", size = 8)
 
 (NEP_mhw | NWA_mhw)/ (NEP_mhw_signature | NWA_mhw_signature)  
 

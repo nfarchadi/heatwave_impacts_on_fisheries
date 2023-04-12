@@ -101,86 +101,54 @@ mgmt_area_coef<-mgmt_area_coef %>%
   mutate(Parameters = factor(Parameters, levels = c("Intensity","Size",
                                                     "Duration","(Intercept)")))
 
-# remove the a here to go back to how it was
-a<-mgmt_area_coef %>% filter(Parameters != "(Intercept)") %>% 
-  ggplot() +
-  geom_vline(xintercept = 0, linetype="dashed", 
-             color = "gray", size = 1)+
-  geom_path(aes(x = Coefficients, y = Y, color = Fleet),
-            size = 1) +
-  geom_label(aes(x = Coefficients, y = Y,label = mgmt_area))+
-  facet_wrap(~Parameters) + theme_bw() + 
-  labs(x = "% Change in Core Fishing Ground Area", y = "Latitude", color = "Fleet")+
-  scale_color_manual(values=c("orange","lightseagreen"))+
-  xlim(-10, 26)
-
-
-
-### NEW ###
 mgmt_area_coef_abs <- mgmt_area_coef %>% filter(Parameters != "(Intercept)") %>%
-  mutate(Coefficients = abs(Coefficients))
+  mutate(Coefficients_abs = abs(Coefficients))
 
 mgmt_area_coef_abs <- mgmt_area_coef_abs %>% 
   group_by(mgmt_area, Fleet) %>%
-  filter(Coefficients == max(Coefficients)) %>% 
-  mutate(greater = 1 %>% as.factor()) %>% 
+  filter(Coefficients_abs == max(Coefficients_abs)) %>% 
+  mutate(greater = c("*") %>% as.factor()) %>% 
   right_join(., mgmt_area_coef_abs, by = c("mgmt_area", "Fleet",
-                                      "X","Y","Parameters","Coefficients"))
+                                      "X","Y","Parameters","Coefficients",
+                                      "Coefficients_abs"))
 
 
 
-b<-mgmt_area_coef_abs %>% filter(Parameters != "(Intercept)") %>% 
+A<-mgmt_area_coef_abs %>% filter(Parameters != "(Intercept)") %>% 
   filter(Fleet == "Longline") %>% 
   mutate(mgmt_area = factor(mgmt_area, levels = rev(c("NED","NEC", "MAB", 
                                               "SAB","SAR","FEC",
                                               "GOM","CAR"))),
-         Coefficients = abs(Coefficients)) %>% 
+         #Coefficients = abs(Coefficients)
+         ) %>% 
   ggplot() +
-  geom_bar(aes(x = mgmt_area, y = Coefficients, fill = Fleet, color = greater,size = greater),stat="identity") +
+  geom_bar(aes(x = mgmt_area, y = Coefficients, fill = Fleet),stat="identity") +
   facet_wrap(~Parameters) + theme_bw() + 
   labs(y = "", x = "Management Area", fill = "Fleet")+
   scale_fill_manual(values=c("orange"))+
-  scale_color_manual(values=c("black"))+
-  coord_flip()+
-  guides(color = "none", size = "none")
+  coord_flip() +
+  geom_text(aes(x = mgmt_area, y = Coefficients, label = greater), 
+            size = 10, vjust = 0.75)
 
 
 
-c<-mgmt_area_coef_abs %>% filter(Parameters != "(Intercept)") %>% 
+B<-mgmt_area_coef_abs %>% filter(Parameters != "(Intercept)") %>% 
   filter(Fleet == "Troll") %>% 
   mutate(mgmt_area = factor(mgmt_area, levels = rev(c("VN","CL","EK","MT"))),
-         Coefficients = abs(Coefficients)) %>% 
+         #Coefficients = abs(Coefficients)
+         ) %>% 
   ggplot() +
-  geom_bar(aes(x = mgmt_area, y = Coefficients, fill = Fleet, color = greater, size = greater),stat="identity") +
+  geom_bar(aes(x = mgmt_area, y = Coefficients, fill = Fleet),stat="identity") +
   facet_wrap(~Parameters) + theme_bw() + 
-  labs(y = "Absolute % Change in Core Fishing Ground Area", x = "Management Area", fill = "Fleet")+
+  labs(y = "% Change in Core Fishing Ground Area", x = "Management Area", fill = "Fleet")+
   scale_fill_manual(values=c("lightseagreen"))+
   scale_color_manual(values=c("black"))+
   coord_flip()+
-  guides(color = "none", size = "none")
+  geom_text(aes(x = mgmt_area, y = Coefficients, label = greater), 
+            size = 10,  vjust = 0.75)+
+  labs(fill = "")
 
-c/b/a + plot_layout(heights = c(0.5,0.5,2))
-
-ggsave("C:/Users/nfarc/Desktop/F4_GLMMcoefficents.png",
-       width = 8, height = 8, units = "in", dpi = 300)
-
-
-### NEW 2 ####
-d<-mgmt_area_coef_abs %>% 
-group_by(Fleet, Parameters) %>% 
-summarise(Coefficients = mean(Coefficients))  %>% 
-ggplot() +
-  geom_bar(aes(x = Parameters, y = Coefficients, fill = Fleet), stat="identity",position='dodge') +
-  theme_bw() + 
-  labs(y = "Mean Absolute % Change in\nCore Fishing Ground Area", x = "MHW Property", fill = "Fleet")+
-  scale_fill_manual(values=c("orange", "lightseagreen"))+
-  theme(axis.title = element_text(size = 10)) 
-
-d/c + plot_layout(heights = c(1,2))
-ggsave("C:/Users/nfarc/Desktop/F4_GLMMcoefficents2.png",
-       width = 8, height = 8, units = "in", dpi = 300)
-
-
+A/B
 
 ggsave(here("Plots","F4_GLMMcoefficents.png"),
        width = 10, height = 6, units = "in", dpi = 300)
